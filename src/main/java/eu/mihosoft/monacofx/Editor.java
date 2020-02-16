@@ -30,6 +30,18 @@ public final class Editor {
         setDocument(document);
     }
 
+    JSObject getJSEditor() {
+        return editor;
+    }
+
+    JSObject getJSWindow() {
+        return window;
+    }
+
+    WebEngine getEngine() {
+        return engine;
+    }
+
     private void registerLanguageJS(LanguageSupport l) {
 
         String registerScript = "require(['vs/editor/editor.main'], function() {\n";
@@ -62,22 +74,12 @@ public final class Editor {
 
         registerScript+="\n})";
 
-        System.out.println("SCRiPT:" + registerScript);
-
         engine.executeScript(registerScript);
     }
 
     private void registerThemeJS(EditorTheme t) {
-        System.out.println("registering theme");
-//        window.setMember(("theme_" + t.name), t);
-//
-//        String registerScript = "require(['vs/editor/editor.main'], function() {\n"+
-//        "        monaco.editor.defineTheme('"+t.name+"', theme_" + t.name+")\n"+
-//        "})";
-//
-//        engine.executeScript(registerScript);
-
-        window.call("monaco.editor.defineTheme",t.name, t);
+        String script = "monaco.editor.defineTheme('"+t.name+"', " + t.toJS()+")";
+        engine.executeScript(script);
     }
 
     void setEditor(JSObject window, JSObject editor) {
@@ -121,6 +123,8 @@ public final class Editor {
         });
 
         getDocument().setEditor(engine, window, editor);
+
+        getViewController().setEditor(window, editor);
     }
 
     public StringProperty currentThemeProperty() {

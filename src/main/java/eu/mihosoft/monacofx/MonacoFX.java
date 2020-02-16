@@ -1,9 +1,5 @@
 package eu.mihosoft.monacofx;
 
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -11,8 +7,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
-import java.util.function.Function;
 
 public class MonacoFX extends Region {
 
@@ -37,13 +31,11 @@ public class MonacoFX extends Region {
         editor = new Editor(engine);
 
         engine.getLoadWorker().stateProperty().addListener((o, old, state) -> {
-                    if (state == Worker.State.SUCCEEDED) {
-
-                        JSObject window = (JSObject) engine.executeScript("window");
-                        JSObject jsEditor = (JSObject)window.getMember("editorView");
-
-                        editor.setEditor(window, jsEditor);
-                    }
+            if (state == Worker.State.SUCCEEDED) {
+                JSObject window = (JSObject) engine.executeScript("window");
+                JSObject jsEditor = (JSObject)window.getMember("editorView");
+                editor.setEditor(window, jsEditor);
+            }
         });
     }
 

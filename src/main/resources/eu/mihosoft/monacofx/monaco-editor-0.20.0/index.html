@@ -34,26 +34,11 @@
 	var foldingProvider;
 	var editorView;
 	var contentChangeListener;
+	var scrollChangeListener;
 
 	require.config({ paths: { 'vs': './package/min/vs' }});
 
 	require(['vs/editor/editor.main'], function() {
-
-		// Define a new theme that contains only rules that match this language
-
-		// monaco.editor.defineTheme('mylangTheme', {
-        //
-		// 	base: 'vs',
-		// 	inherit: false,
-        //
-		// 	rules: [
-		// 		{ token: 'custom-info', foreground: '808080' },
-		// 		{ token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
-		// 		{ token: 'custom-notice', foreground: 'FFA500' },
-		// 		{ token: 'custom-date', foreground: '008800' },
-		// 	]
-        //
-		// });
 
 		editorView = monaco.editor.create(document.getElementById('container'), {
 
@@ -98,14 +83,19 @@
 
 		});
 
-		editorView.onDidChangeModelContent((ev)=> {
+		editorView.onDidChangeModelContent((ev) => {
             if(contentChangeListener!=null) {
                contentChangeListener.apply([ev]);
             }
         });
 
-	});
+		editorView.onDidScrollChange((ev) => {
+            if(scrollChangeListener!=null) {
+               scrollChangeListener.apply([ev]);
+            }
+        });
 
+	});
 
 
 	function getCode() {

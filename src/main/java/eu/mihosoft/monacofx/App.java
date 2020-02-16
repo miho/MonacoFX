@@ -3,41 +3,28 @@
  */
 package eu.mihosoft.monacofx;
 
-import java.io.File;
-import java.util.function.Function;
-
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker.State;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import netscape.javascript.JSObject;
 
 public class App extends Application {
-
-    public String getGreeting() {
-        return "Hello world.";
-    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        StackPane root = new StackPane();
+        // create new monaco editor node
+        MonacoFX monacoFX = new MonacoFX();
+        StackPane root = new StackPane(monacoFX);
 
-        MonacoFX editor = new MonacoFX();
+        // set initial text
+        monacoFX.getEditor().getDocument().setText("[error: test]\n[info: test]\n[custom data]\n");
 
-        editor.getEditor().getDocument().setText("[error:]   \n\nint a; \"abc\"");
-
+        // custom language support
         LanguageSupport myLang = new LanguageSupport() {
             @Override
             public String getName() {
@@ -58,55 +45,41 @@ public class App extends Application {
             public MonarchSyntaxHighlighter getMonarchSyntaxHighlighter() {
                 return () ->
                 " 	tokenizer: {\n"+
-                "\n"+
                 " 		root: [\n"+
-                "\n"+
                 "           [/\\[error.*/, \"custom-error\"],\n"+
-                "\n"+
                 " 			[/\\[notice.*/, \"custom-notice\"],\n"+
-                "\n"+
                 " 			[/\\[info.*/, \"custom-info\"],\n"+
-                "\n"+
                 " 			[/\\[[a-zA-Z 0-9:]+\\]/, \"custom-date\"],\n"+
-                "\n"+
                 " 		],\n"+
-                "\n"+
                 " 	}\n";
             }
         };
 
-        editor.getEditor().registerLanguage(myLang);
+        // register custom language
+        monacoFX.getEditor().registerLanguage(myLang);
 
+        // define a theme for the language
         EditorTheme theme = new EditorTheme("mylangTheme","vs",false,
             new Rule("custom-info","808080"),
-            new Rule("custom-error", "ff0000",  "bold")
+            new Rule("custom-error", "ff0000",  null, null, null, "bold"),
+            new Rule("custom-date", "20ff00")
         );
 
-        editor.getEditor().registerTheme(theme);
+        // register the theme
+        monacoFX.getEditor().registerTheme(theme);
 
-        Thread thread = new Thread(()->{
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Platform.runLater(()->editor.getEditor().setCurrentLanguage("mylang"));
-            Platform.runLater(()->editor.getEditor().setCurrentTheme("mylangTheme"));
+        // tell monaco to use our custom language and theme
+        monacoFX.getEditor().setCurrentLanguage("mylang");
+        monacoFX.getEditor().setCurrentTheme("mylangTheme");
 
-        });
-        thread.start();
+        // or use a predefined language like 'c'
+        //
+        // monacoFX.getEditor().setCurrentLanguage("c");
+        // monacoFX.getEditor().setCurrentTheme("vs");
 
-        editor.getEditor().setCurrentLanguage("c");
-        editor.getEditor().setCurrentTheme("vs");
-
-//        editor.getEditor().getDocument().textProperty().addListener((ov,o,n)->{
-//            System.out.println("Text-Change: " + editor.getEditor().getDocument().getText());
-//        });
-
-        root.getChildren().add(editor);
-
+        // the usual scene & stage setup
         Scene scene = new Scene(root, 800,600);
-
+        primaryStage.setTitle("MonacoFX Demo");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
