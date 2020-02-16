@@ -31,6 +31,8 @@
 
 <script>
 
+    var editorCreatedCallback;
+
 	var foldingProvider;
 	var editorView;
 	var contentChangeListener;
@@ -81,7 +83,11 @@
 				alwaysConsumeMouseWheel: false
 	        }
 
-		});
+        });
+        
+        if(editorCreatedCallback!=null) {
+            editorCreatedCallback.apply([editorView]);
+        }
 
 		editorView.onDidChangeModelContent((ev) => {
             if(contentChangeListener!=null) {

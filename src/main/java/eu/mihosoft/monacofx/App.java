@@ -5,6 +5,7 @@ package eu.mihosoft.monacofx;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -18,11 +19,12 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         // create new monaco editor node
-        MonacoFX monacoFX = new MonacoFX();
-        StackPane root = new StackPane(monacoFX);
+        MonacoFX monacoFX1 = new MonacoFX();
+        MonacoFX monacoFX2 = new MonacoFX();
+        StackPane root = new StackPane(new HBox(monacoFX1, monacoFX2));
 
         // set initial text
-        monacoFX.getEditor().getDocument().setText("[error: test]\n[info: test]\n[custom data]\n");
+        monacoFX1.getEditor().getDocument().setText("[error: test]\n[info: test]\n[custom data]\n");
 
         // custom language support
         LanguageSupport myLang = new LanguageSupport() {
@@ -56,7 +58,7 @@ public class App extends Application {
         };
 
         // register custom language
-        monacoFX.getEditor().registerLanguage(myLang);
+        monacoFX1.getEditor().registerLanguage(myLang);
 
         // define a theme for the language
         EditorTheme theme = new EditorTheme("mylangTheme","vs",false,
@@ -66,16 +68,19 @@ public class App extends Application {
         );
 
         // register the theme
-        monacoFX.getEditor().registerTheme(theme);
+        monacoFX1.getEditor().registerTheme(theme);
 
         // tell monaco to use our custom language and theme
-        monacoFX.getEditor().setCurrentLanguage("mylang");
-        monacoFX.getEditor().setCurrentTheme("mylangTheme");
+        monacoFX1.getEditor().setCurrentLanguage("mylang");
+        monacoFX1.getEditor().setCurrentTheme("mylangTheme");
 
         // or use a predefined language like 'c'
         //
-        // monacoFX.getEditor().setCurrentLanguage("c");
-        // monacoFX.getEditor().setCurrentTheme("vs");
+        monacoFX1.getEditor().setCurrentLanguage("c");
+        monacoFX1.getEditor().setCurrentTheme("vs");
+
+        monacoFX2.getEditor().setCurrentLanguage("java");
+        monacoFX2.getEditor().setCurrentTheme("vs-dark");
 
         // the usual scene & stage setup
         Scene scene = new Scene(root, 800,600);
