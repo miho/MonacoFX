@@ -4,11 +4,11 @@ import netscape.javascript.JSObject;
 
 import java.util.function.Function;
 
-public class JCallable implements Function<JSObject, Object> {
+public class JFunction implements Function<JSObject, Object> {
 
     private Function<Object[],Object> actualCallable;
 
-    public JCallable( Function<Object[],Object> callable) {
+    public JFunction(Function<Object[],Object> callable) {
         this.actualCallable = callable;
     }
 

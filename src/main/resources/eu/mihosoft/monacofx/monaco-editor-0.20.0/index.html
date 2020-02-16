@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<!--	<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+		body {
+			overflow-x: hidden;
+			overflow-y: hidden;
+		}
+
+        #container {
+            height: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="container"></div>
+
+<script src="./package/min/vs/loader.js"></script>
+
+<script>
+
+	var foldingProvider;
+	var editorView;
+	var contentChangeListener;
+
+	require.config({ paths: { 'vs': './package/min/vs' }});
+
+	require(['vs/editor/editor.main'], function() {
+
+		// Define a new theme that contains only rules that match this language
+
+		// monaco.editor.defineTheme('mylangTheme', {
+        //
+		// 	base: 'vs',
+		// 	inherit: false,
+        //
+		// 	rules: [
+		// 		{ token: 'custom-info', foreground: '808080' },
+		// 		{ token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+		// 		{ token: 'custom-notice', foreground: 'FFA500' },
+		// 		{ token: 'custom-date', foreground: '008800' },
+		// 	]
+        //
+		// });
+
+		editorView = monaco.editor.create(document.getElementById('container'), {
+
+			//theme: 'mylangTheme',
+
+			value: getCode(),
+
+			//language: 'mylang',
+
+            automaticLayout: true,
+
+            roundedSelection: false,
+
+			mouseWheelScrollSensitivity: 0.1,
+
+			scrollBeyondLastLine: false,
+
+            scrollbar: {
+                // Subtle shadows to the left & top. Defaults to true.
+                useShadows: true,
+
+                // Render vertical arrows. Defaults to false.
+                verticalHasArrows: true,
+                // Render horizontal arrows. Defaults to false.
+                horizontalHasArrows: true,
+
+                // Render vertical scrollbar.
+                // Accepted values: 'auto', 'visible', 'hidden'.
+                // Defaults to 'auto'
+                vertical: 'auto',
+                // Render horizontal scrollbar.
+                // Accepted values: 'auto', 'visible', 'hidden'.
+                // Defaults to 'auto'
+                horizontal: 'auto',
+
+                verticalScrollbarSize: 17,
+                horizontalScrollbarSize: 17,
+                arrowSize: 30,
+
+				alwaysConsumeMouseWheel: false
+	        }
+
+		});
+
+		editorView.onDidChangeModelContent((ev)=> {
+            if(contentChangeListener!=null) {
+               contentChangeListener.apply([ev]);
+            }
+        });
+
+	});
+
+
+
+	function getCode() {
+
+		return [
+			''
+		].join('\n');
+
+	}
+
+	function getEditorView() {
+		return editorView;
+    }
+
+</script>
+
+</body>
+
+</html>
