@@ -1,6 +1,8 @@
 # MonacoFX
 JavaFX editor node based on the powerful Monaco editor that drives VSCode
 
+<img src="resources/img/screenshot.png">
+
 
 ## How To Build The Project
 
