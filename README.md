@@ -1,4 +1,6 @@
 # MonacoFX
+[ ![Download](https://api.bintray.com/packages/miho/MonacoFX/MonacoFX/images/download.svg) ](https://bintray.com/miho/MonacoFX/MonacoFX/_latestVersion)
+
 JavaFX editor node based on the powerful Monaco editor that drives VSCode
 
 <img src="resources/img/screenshot.png">
