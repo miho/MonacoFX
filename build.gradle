@@ -27,6 +27,17 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+jar {
+    manifest {
+        attributes('Automatic-Module-Name': 'eu.mihosoft.monacofx')
+    }
+    
+    // // add velocity legacy to jar file
+    // from {
+    //     configurations.legacyVelocity.collect { it.isDirectory() ? it : zipTree(it) }
+    // }
+}
+
 application {
     mainClassName = 'eu.mihosoft.monacofx.App'
 }
