@@ -107,7 +107,7 @@ public class App extends Application {
 
         // the usual scene & stage setup
         Scene scene = new Scene(root, 800,600);
-        primaryStage.setTitle("MonacoFX Demo");
+        primaryStage.setTitle("MonacoFX Demo (running on JDK " + System.getProperty("java.version") + ")");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
