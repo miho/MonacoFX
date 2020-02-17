@@ -45,6 +45,8 @@ public class App extends Application {
 }
 ```
 
+Visit the [MonacoFX tutorial projects](https://github.com/miho/MonacoFX-Tutorials) and learn more about advanced topics, such as adding custom language support and code folding.
+
 
 ## How To Build The Project
 
