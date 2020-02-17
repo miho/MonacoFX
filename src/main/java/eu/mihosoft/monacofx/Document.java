@@ -76,11 +76,11 @@ public class Document {
         return textProperty().get();
     }
 
-    ReadOnlyIntegerProperty numberOfLinesProperty() {
+    public ReadOnlyIntegerProperty numberOfLinesProperty() {
         return numberOfLinesProperty;
     }
 
-    StringProperty languageProperty() {
+    public StringProperty languageProperty() {
         return languageProperty;
     }
 

@@ -112,7 +112,7 @@ public class MonacoFX extends Region {
         );
     }
 
-    Editor getEditor() {
+    public Editor getEditor() {
         return editor;
     }
 
