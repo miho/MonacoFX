@@ -53,6 +53,5 @@ license {
     ext.years   = ('2020'.equals(ext.yearCurrent)?'':'2020-')+ext.yearCurrent
     ext.author1 = 'Michael Hoffer <info@michaelhoffer.de>'
 
-    includes(["**/*.java", "**/*.gradle", '**/index.html'])
-    exclude '**/monaco-editor-0.20.0/'
+    includes(['**/*.java', '**/monaco-editor-*/index.html'])
 }
