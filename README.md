@@ -10,7 +10,7 @@ JavaFX editor node based on the powerful Monaco editor that drives VSCode
 
 ### 1. Dependencies
 
-- JDK >= 13 (tested with JDK 13)
+- JDK >= 11 (tested with JDK 13)
 - Internet Connection (other dependencies will be downloaded automatically)
 - Optional: IDE with [Gradle](http://www.gradle.org/) support
 
