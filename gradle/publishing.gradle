@@ -28,25 +28,8 @@ task publicationJar(type: Jar, dependsOn: classes) {
     // project class files compiled from source
     from files(sourceSets.main.output.classesDirs)
 }
-// create one jar for the plugin jar (fat-jar)
-task publicationVRLPluginJar(type: Jar, dependsOn: jar) {
-
-    extension = 'vrlplugin'
-
-    // dependencies except VRL
-    from configurations.runtime.asFileTree.
-            filter({file->return !file.name.startsWith("vrl-0")}).
-            files.collect { zipTree(it) }
-
-    // project class files compiled from source
-    from files(sourceSets.main.output.classesDirs)
-
-    // include shaders and other resources
-    from files(sourceSets.main.resources)
-}
 
 artifacts {
-    archives publicationVRLPluginJar
     archives publicationJar
     archives javadocJar
     archives sourcesJar
@@ -57,8 +40,6 @@ ext {
     buildDate = new java.text.SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
     buildTime = new java.text.SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
 }
-
-
 
 jar {
     manifest {
@@ -111,7 +92,6 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            artifact publicationVRLPluginJar
 
             pom.withXml {
                 def root = asNode()
