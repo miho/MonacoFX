@@ -12,7 +12,7 @@ JavaFX editor node based on the powerful Monaco editor that drives VSCode
 - Internet Connection (other dependencies will be downloaded automatically)
 - Optional: IDE with [Gradle](http://www.gradle.org/) support
 
-### 2. Build
+### 2. Building
 
 #### IDE
 
@@ -38,23 +38,21 @@ task to build the project.
     cd Path\To\MonacoFX
     gradlew assemble
 
-### 3. Run the sample App
+### 3. Running the sample App
 
 #### IDE
 
 To run the project from an IDE do the following:
 
 - open the  [Gradle](http://www.gradle.org/) project
-- call the `run` Gradle task to build the project
-
-#### Command Line
+- call the `run` Gradle task to run the project
 
 #### Command Line
 
 Running the project from the command line is also possible.
 
 Navigate to the project folder and call the `run` [Gradle](http://www.gradle.org/)
-task to build the project.
+task to run the project.
 
 ##### Bash (Linux/OS X/Cygwin/other Unix-like OS)
 
