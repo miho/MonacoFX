@@ -25,6 +25,13 @@ public class App extends Application {
 
         // set initial text
         monacoFX1.getEditor().getDocument().setText("[error: test]\n[info: test]\n[custom data]\n");
+        monacoFX2.getEditor().getDocument().setText(
+                "#include <stdio.h>\n" +
+                "int main() {\n" +
+                "   // printf() displays the string inside quotation\n" +
+                "   printf(\"Hello, World!\");\n" +
+                "   return 0;\n" +
+                "}");
 
         // custom language support
         LanguageSupport myLang = new LanguageSupport() {
@@ -75,11 +82,7 @@ public class App extends Application {
         monacoFX1.getEditor().setCurrentTheme("mylangTheme");
 
         // or use a predefined language like 'c'
-        //
-        monacoFX1.getEditor().setCurrentLanguage("c");
-        monacoFX1.getEditor().setCurrentTheme("vs");
-
-        monacoFX2.getEditor().setCurrentLanguage("java");
+        monacoFX2.getEditor().setCurrentLanguage("c");
         monacoFX2.getEditor().setCurrentTheme("vs-dark");
 
         // the usual scene & stage setup

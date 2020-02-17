@@ -2,7 +2,12 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
+
+apply from: 'gradle/publishing.gradle'
 
 sourceCompatibility = '13'
 targetCompatibility = '13'
@@ -21,5 +26,5 @@ application {
 }
 
 javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web']
+    modules = [ 'javafx.controls', 'javafx.web']
 }
