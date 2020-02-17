@@ -2,7 +2,6 @@ import java.text.SimpleDateFormat
 
 plugins {
     id 'java'
-    id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'maven-publish'
@@ -36,10 +35,6 @@ jar {
     // from {
     //     configurations.legacyVelocity.collect { it.isDirectory() ? it : zipTree(it) }
     // }
-}
-
-application {
-    mainClassName = 'eu.mihosoft.monacofx.App'
 }
 
 javafx {
