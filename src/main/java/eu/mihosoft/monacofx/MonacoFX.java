@@ -116,4 +116,9 @@ public class MonacoFX extends Region {
         return editor;
     }
 
+    @Deprecated
+    public WebEngine getWebEngine() {
+        return engine;
+    }
+
 }

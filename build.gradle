@@ -11,7 +11,7 @@ plugins {
 apply from: 'gradle/publishing.gradle'
 
 wrapper {
-    gradleVersion = '6.1'
+    gradleVersion = '6.8.2'
 }
 
 sourceCompatibility = '11'
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
 }
 
 jar {
