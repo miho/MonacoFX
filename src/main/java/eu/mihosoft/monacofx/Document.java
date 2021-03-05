@@ -34,6 +34,8 @@ public class Document {
     private JSObject editorGlobal;
     private JSObject window;
 
+    private boolean updatingText;
+
     private final StringProperty textProperty = new SimpleStringProperty();
     private final StringProperty languageProperty = new SimpleStringProperty();
     private final IntegerProperty numberOfLinesProperty = new SimpleIntegerProperty();
@@ -50,14 +52,19 @@ public class Document {
 
         // text changes -> js
         textProperty.addListener((ov) -> {
-            editor.call("setValue", getText());
+            if(!updatingText) editor.call("setValue", getText());
         });
 
         // keep a global reference because it's garbage collected otherwise
         jsfListener = new JFunction( args -> {
             String text = (String) editor.call("getValue");
             if(text!=null) {
-                setText(text);
+                try {
+                    updatingText = true;
+                    setText(text);
+                }finally {
+                    updatingText=false;
+                }
                 numberOfLinesProperty.setValue(text.split("\\R").length);
             }
             return null;

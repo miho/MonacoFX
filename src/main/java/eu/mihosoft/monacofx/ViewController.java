@@ -30,15 +30,19 @@ import netscape.javascript.JSObject;
 public final class ViewController {
 
     private final Editor editor;
+    private JSObject window;
 
     //private final ObjectProperty<Position> cursorPositionProperty = new SimpleObjectProperty<>();
     private final IntegerProperty scrollPositionProperty = new SimpleIntegerProperty();
+
+    private JFunction scrollChangeListener;
 
     public ViewController(Editor editor) {
         this.editor = editor;
     }
 
     void setEditor(JSObject window, JSObject editor) {
+        this.window = window;
          // initial scroll
         editor.call("setScrollPosition", getScrollPosition());
         // scroll changes -> js
@@ -46,11 +50,20 @@ public final class ViewController {
             editor.call("setScrollPosition", getScrollPosition());
         });
          // scroll changes <- js
-        window.setMember("scrollChangeListener", new JFunction( args -> {
+        scrollChangeListener = new JFunction( args -> {
             int pos = (int) editor.call("getScrollTop");
             setScrollPosition(pos);
             return null;
-        }));
+        });
+        window.setMember("scrollChangeListener", scrollChangeListener);
+    }
+
+    public void undo() {
+        window.call("undo");
+    }
+
+    public void redo() {
+        window.call("redo");
     }
 
     public void setScrollPosition(int posIdx) {

@@ -126,8 +126,55 @@
             }
         });
 
+		// UNDO-/REDO functionality
+        const initialVersion = editorView.getModel().getAlternativeVersionId();
+        let currentVersion = initialVersion;
+        let lastVersion = initialVersion;
+        editorView.onDidChangeModelContent(e => {
+            const versionId = editorView.getModel().getAlternativeVersionId();
+            // undoing
+            if (versionId < currentVersion) {
+                // REDO AVAILABLE
+                // enableRedoButton();
+
+                // no more undo possible
+                if (versionId === initialVersion) {
+                    // UNDO NOT AVAILABLE
+                    // disableUndoButton();
+                }
+            } else {
+                // redoing
+                if (versionId <= lastVersion) {
+                    // redoing the last change
+                    if (versionId == lastVersion) {
+                        // REDO NOT AVAILABLE
+                        // disableRedoButton();
+                    }
+                } else { // adding new change, disable redo when adding new changes
+                    // REDO NOT AVAILABLE
+                    // disableRedoButton();
+                    if (currentVersion > lastVersion) {
+                        lastVersion = currentVersion;
+                    }
+                }
+
+                // UNDO AVAILABLE
+                // enableUndoButton();
+            }
+            currentVersion = versionId;
+        });
+
 	});
 
+    function undo() {
+        editorView.trigger('aaaa', 'undo', 'aaaa');
+        editorView.focus();
+    }
+
+    function redo() {
+        editorView.trigger('aaaa', 'redo', 'aaaa');
+        editorView.focus();
+    }
 
 	function getCode() {
 
