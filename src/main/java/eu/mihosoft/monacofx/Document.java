@@ -38,6 +38,8 @@ public class Document {
     private final StringProperty languageProperty = new SimpleStringProperty();
     private final IntegerProperty numberOfLinesProperty = new SimpleIntegerProperty();
 
+    private JFunction jsfListener;
+
     void setEditor(WebEngine engine, JSObject window, JSObject editor) {
         this.engine = engine;
         this.editor = editor;
@@ -51,16 +53,18 @@ public class Document {
             editor.call("setValue", getText());
         });
 
-        // text changes <- js
-        window.setMember("contentChangeListener", new JFunction( args -> {
-
+        // keep a global reference because it's garbage collected otherwise
+        jsfListener = new JFunction( args -> {
             String text = (String) editor.call("getValue");
             if(text!=null) {
                 setText(text);
                 numberOfLinesProperty.setValue(text.split("\\R").length);
             }
             return null;
-        }));
+        });
+
+        // text changes <- js
+        window.setMember("contentChangeListener", jsfListener);
 
     }
 
