@@ -61,7 +61,7 @@ public class Document {
             if(text!=null) {
                 try {
                     updatingText = true;
-                    setText(text);
+                    textProperty().set(text);
                 }finally {
                     updatingText=false;
                 }
@@ -80,7 +80,17 @@ public class Document {
     }
 
     public void setText(String text) {
-        textProperty().set(text);
+        if(editor==null) {
+            textProperty.set(text);
+        } else {
+            try {
+                updatingText = true;
+                textProperty().set(text);
+            }finally {
+                updatingText=false;
+            }
+            editor.call("setValue", text);
+        }
     }
 
     public String getText() {
