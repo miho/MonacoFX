@@ -137,17 +137,6 @@
             }
         });
 
-        // adds 'Format document' into the context menu
-        editorView.addAction({
-            id: "editor.action.FormatDocument",
-            label: "Format",
-            contextMenuGroupId: "9_cutcopypaste",
-            contextMenuOrder: 4,
-            run: (editor) => {
-                editor.trigger('', 'editor.action.formatDocument');
-            }
-        });
-
         if(editorCreatedCallback!=null) {
             editorCreatedCallback.apply([editorView]);
         }
