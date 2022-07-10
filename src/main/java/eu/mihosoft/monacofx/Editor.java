@@ -166,8 +166,8 @@ public final class Editor {
         return this.currentLanguageProperty;
     }
 
-    public void setCurrentLanguage(String theme) {
-        currentLanguageProperty().set(theme);
+    public void setCurrentLanguage(String language) {
+        currentLanguageProperty().set(language);
     }
 
     public String getCurrentLanguage() {
