@@ -112,4 +112,12 @@ public class Document {
     public String getLanguage() {
         return languageProperty().get();
     }
+
+    /**
+     * used to update the text in the editor without losing the document history
+     * @param text the text in editor is replaced byt this text
+     */
+    public void updateText(String text) {
+        window.call("updateText", text);
+    }
 }
