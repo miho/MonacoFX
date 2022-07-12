@@ -30,6 +30,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -43,9 +44,9 @@ public class MonacoFX extends Region {
     private final static String EDITOR_HTML_RESOURCE_LOCATION = "/eu/mihosoft/monacofx/monaco-editor-0.20.0/index.html";
 
     private final Editor editor;
+    private final SystemClipboardWrapper systemClipboardWrapper;
 
     public MonacoFX() {
-
         view = new WebView();
         getChildren().add(view);
         engine = view.getEngine();
@@ -55,10 +56,13 @@ public class MonacoFX extends Region {
 
         editor = new Editor(engine);
 
+        systemClipboardWrapper = new SystemClipboardWrapper();
+        ClipboardBridge clipboardBridge = new ClipboardBridge(getEditor().getDocument(), systemClipboardWrapper);
         engine.getLoadWorker().stateProperty().addListener((o, old, state) -> {
             if (state == Worker.State.SUCCEEDED) {
 
                 JSObject window = (JSObject) engine.executeScript("window");
+                window.setMember("clipboardBridge", clipboardBridge);
 
                 AtomicBoolean jsDone = new AtomicBoolean(false);
                 AtomicInteger attempts = new AtomicInteger();
@@ -89,6 +93,11 @@ public class MonacoFX extends Region {
                 thread.start();
 
             }
+        });
+
+        addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            Object obj = engine.executeScript("editorView.getModel().getValueInRange(editorView.getSelection())");
+            systemClipboardWrapper.handleCopyCutKeyEvent(event, obj);
         });
     }
 
