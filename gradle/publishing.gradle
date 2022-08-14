@@ -1,36 +1,30 @@
 // -----------------------------------------------------------------------------
 // Collect publishing information
 // -----------------------------------------------------------------------------
-ext.publishing = [:]
-ext.publishing.bintray = [:]
+ext.publishingInfo = [:]
 
-ext.publishing.pomName =  ext.publishing.artifactId
+ext.publishingInfo.pomName =  ext.publishingInfo.artifactId
 
 apply from: "gradle/project-info.gradle"
+apply plugin: 'signing'
 
 // -----------------------------------------------------------------------------
 // Performs publishing
 // -----------------------------------------------------------------------------
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier  = 'javadoc'
     from javadoc.destinationDir
 }
 
 // create one jar for the source files
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    archiveClassifier  = 'sources'
     from sourceSets.main.allSource
 }
 
-// create one jar for the plugin jar (no fat-jar)
-task publicationJar(type: Jar, dependsOn: classes) {
-    // project class files compiled from source
-    from files(sourceSets.main.output.classesDirs)
-}
-
 artifacts {
-    archives publicationJar
+    archives jar
     archives javadocJar
     archives sourcesJar
 }
@@ -48,7 +42,7 @@ jar {
                 'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.properties['java.vm.version'] + ")",
                 'Build-Date': project.buildDate,
                 'Build-Time': project.buildTime,
-                //'Build-Revision': versioning.info.commit,
+                'Build-Revision': versioning.info.commit,
                 'Specification-Title': project.name,
                 'Specification-Version': project.version,
                 'Implementation-Title': project.name,
@@ -59,76 +53,121 @@ jar {
 
 
 def pomConfig = {
-    name ext.publishing.pomName
-    description ext.publishing.desc
-    url ext.publishing.websiteUrl
-    inceptionYear ext.publishing.inceptionYear
+    name ext.publishingInfo.pomName
+    description ext.publishingInfo.desc
+    url ext.publishingInfo.websiteUrl
+    inceptionYear ext.publishingInfo.inceptionYear
     licenses {
         license([:]) {
-            name ext.publishing.license
-            url ext.publishing.licenseUrl
+            name ext.publishingInfo.license
+            url ext.publishingInfo.licenseUrl
             distribution 'repo'
         }
     }
     scm {
-        url ext.publishing.vcsUrl
-        connection ext.publishing.vcsUrl
-        developerConnection ext.publishing.vcsUrl
+        url ext.publishingInfo.vcsUrl
+        connection ext.publishingInfo.vcsUrl
+        developerConnection ext.publishingInfo.vcsUrl
     }
     developers {
         developer {
-            id ext.publishing.developerNameAlias
-            name ext.publishing.developerName
+            id ext.publishingInfo.developerNameAlias
+            name ext.publishingInfo.developerName
         }
     }
 }
 
+
+
 publishing {
+
+    repositories {
+        // --------------------------------------------------------------------------------
+        // Destination Repository 'GitHubPackages'
+        // -> call task 'publishMavenJavaPublicationToGitHubPackagesRepository' to publish
+        // --------------------------------------------------------------------------------
+        maven {
+            name = "GitHubPackages"
+            // see https://levelup.gitconnected.com/publish-a-maven-package-to-github-with-gradle-fabc6de24d6
+            // Replace OWNER and REPOSITORY with your GitHub username/repository
+            // (must be both lowercase according to the documenations)
+            // url = uri("https://maven.pkg.github.com/OWNER/REPOSITORY")
+            url = uri(project.findProperty('publishingInfo').gitHubMavenRepo)
+            credentials {
+                // Make sure to generate a token with write-packages and read-packages permission:
+                // https://github.com/settings/tokens/new
+                // You can either store the username and token in
+                //   ~/.gradle/gradle.properties (use the gpr.user and gpr.key keys)
+                // Or you can store them as environment variables e.g. in ~/.bash_profile or ~/.zsh
+                // depending on your shell (GITHUB_USERNAME and GITHUB_TOKEN keys)
+                // Or you pass them via CLI: gradle publish -Pgpr.user=username -Pgpr.key=token
+                // See at EOF for examples on how to store the credentials
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+
+        // --------------------------------------------------------------------------------
+        // Destination Repository 'OSSRH'
+        // telling gradle to publish artifact to local directory
+        // -> call task 'publishMavenJavaPublicationToOSSRHRepository' to publish
+        // -> go to https://oss.sonatype.org/#stagingRepositories, click 'close', drink coffee and then click 'release'
+        //    if closing was successful
+        // --------------------------------------------------------------------------------
+        maven {
+            name = "OSSRH"
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username = project.findProperty("oss.user") ?: System.getenv("OSS_USERNAME")
+                password = project.findProperty("oss.pwd") ?: System.getenv("OSS_PWD")
+            }
+        }
+
+        // --------------------------------------------------------------------------------
+        // Destination Repository 'BuildDir'
+        // telling gradle to publish artifact to local directory
+        // -> call task 'publishMavenJavaPublicationToBuildDirRepository' to publish
+        // --------------------------------------------------------------------------------
+        maven {
+            name = "BuildDir"
+            url "file:/${buildDir}/artifacts"
+        }
+    }
+
+
     publications {
-        mavenCustom(MavenPublication) {
-            groupId publishing.groupId
-            artifactId publishing.artifactId
-            version publishing.versionId
+        mavenJava(MavenPublication) {
+            groupId publishingInfo.groupId
+            artifactId publishingInfo.artifactId
+            version publishingInfo.versionId
             from components.java
             artifact sourcesJar
             artifact javadocJar
 
             pom.withXml {
                 def root = asNode()
-                root.appendNode 'description', publishing.desc
-                root.dependencies.'*'.findAll() {
-                    it.groupId.text() == 'org.openjfx'
-                }.each {
-                    it.remove(it.classifier)
-                }
+                root.appendNode 'description', publishingInfo.desc
                 root.children().last() + pomConfig
             }
         }
     }
 }
 
-if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = ''
-if (!project.hasProperty('bintrayApiKey')) ext.bintrayApiKey = ''
 
-bintray {
-    user = project.bintrayUsername
-    key = project.bintrayApiKey
-    publications = ['mavenCustom']
-    pkg {
-        repo                  = publishing.bintray.repo
-        userOrg               = publishing.bintray.userOrg
-        name                  = publishing.bintray.name
-        desc                  = publishing.desc
-        licenses              = [publishing.license]
-        labels                = publishing.labels
-        websiteUrl            = publishing.websiteUrl
-        issueTrackerUrl       = publishing.issueTrackerUrl
-        vcsUrl                = publishing.vcsUrl
-        publicDownloadNumbers = true
+if(
+        project.findProperty("signing.secretKeyRingFile")
+                && project.findProperty("signing.password")
+                && project.findProperty("signing.keyId")
+) {
 
-        version {
-            name              = publishing.versionId
-            vcsTag            = 'v' + publishing.versionId
-        }
+    signing {
+        sign publishing.publications
     }
+
+} else {
+    println "> skipping signing, provide\n" +
+            "  - 'signing.secretKeyRingFile'\n" +
+            "  - 'signing.password'\n" +
+            "  - 'signing.keyId'\n" +
+            " to activate it\n"
 }
