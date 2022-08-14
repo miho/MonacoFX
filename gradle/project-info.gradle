@@ -18,4 +18,4 @@ ext.publishingInfo.websiteUrl            = 'https://github.com/miho/MonacoFX'
 ext.publishingInfo.issueTrackerUrl       = 'https://github.com/miho/MonacoFX/issues'
 ext.publishingInfo.vcsUrl                = 'https://github.com/miho/MonacoFX.git'
 
-ext.publishingInfo.pomName               =  ext.publishing.artifactId
+ext.publishingInfo.pomName               =  ext.publishingInfo.artifactId

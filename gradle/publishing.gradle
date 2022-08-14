@@ -42,7 +42,7 @@ jar {
                 'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.properties['java.vm.version'] + ")",
                 'Build-Date': project.buildDate,
                 'Build-Time': project.buildTime,
-                'Build-Revision': versioning.info.commit,
+//                'Build-Revision': versioning.info.commit,
                 'Specification-Title': project.name,
                 'Specification-Version': project.version,
                 'Implementation-Title': project.name,
@@ -86,26 +86,26 @@ publishing {
         // Destination Repository 'GitHubPackages'
         // -> call task 'publishMavenJavaPublicationToGitHubPackagesRepository' to publish
         // --------------------------------------------------------------------------------
-        maven {
-            name = "GitHubPackages"
-            // see https://levelup.gitconnected.com/publish-a-maven-package-to-github-with-gradle-fabc6de24d6
-            // Replace OWNER and REPOSITORY with your GitHub username/repository
-            // (must be both lowercase according to the documenations)
-            // url = uri("https://maven.pkg.github.com/OWNER/REPOSITORY")
-            url = uri(project.findProperty('publishingInfo').gitHubMavenRepo)
-            credentials {
-                // Make sure to generate a token with write-packages and read-packages permission:
-                // https://github.com/settings/tokens/new
-                // You can either store the username and token in
-                //   ~/.gradle/gradle.properties (use the gpr.user and gpr.key keys)
-                // Or you can store them as environment variables e.g. in ~/.bash_profile or ~/.zsh
-                // depending on your shell (GITHUB_USERNAME and GITHUB_TOKEN keys)
-                // Or you pass them via CLI: gradle publish -Pgpr.user=username -Pgpr.key=token
-                // See at EOF for examples on how to store the credentials
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
+//        maven {
+//            name = "GitHubPackages"
+//            // see https://levelup.gitconnected.com/publish-a-maven-package-to-github-with-gradle-fabc6de24d6
+//            // Replace OWNER and REPOSITORY with your GitHub username/repository
+//            // (must be both lowercase according to the documenations)
+//            // url = uri("https://maven.pkg.github.com/OWNER/REPOSITORY")
+//            url = uri(project.findProperty('publishingInfo').gitHubMavenRepo)
+//            credentials {
+//                // Make sure to generate a token with write-packages and read-packages permission:
+//                // https://github.com/settings/tokens/new
+//                // You can either store the username and token in
+//                //   ~/.gradle/gradle.properties (use the gpr.user and gpr.key keys)
+//                // Or you can store them as environment variables e.g. in ~/.bash_profile or ~/.zsh
+//                // depending on your shell (GITHUB_USERNAME and GITHUB_TOKEN keys)
+//                // Or you pass them via CLI: gradle publish -Pgpr.user=username -Pgpr.key=token
+//                // See at EOF for examples on how to store the credentials
+//                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+//                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+//            }
+//        }
 
         // --------------------------------------------------------------------------------
         // Destination Repository 'OSSRH'
