@@ -13,8 +13,8 @@ import javafx.scene.input.KeyEvent;
  */
 public class SystemClipboardWrapper {
 
-	private final KeyCodeCombination KEY_CODE_CTRL_C = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
-	private final KeyCodeCombination KEY_CODE_CTRL_X = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
+	private final KeyCodeCombination KEY_CODE_CTRL_C = new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCodeCombination KEY_CODE_CTRL_X = new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN);
 
 	/**
 	 * Puts the text into clipboard.
