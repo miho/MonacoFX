@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 
 plugins {
     id 'java'
-    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.4'
@@ -11,7 +11,7 @@ plugins {
 apply from: 'gradle/publishing.gradle'
 
 wrapper {
-    gradleVersion = '6.8.2'
+    gradleVersion = '7.5.1'
 }
 
 sourceCompatibility = '11'
