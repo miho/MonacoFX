@@ -45,6 +45,7 @@ public class MonacoFX extends Region {
 
     private final Editor editor;
     private final SystemClipboardWrapper systemClipboardWrapper;
+    private boolean readOnly;
 
     public MonacoFX() {
         view = new WebView();
@@ -128,6 +129,52 @@ public class MonacoFX extends Region {
     @Deprecated
     public WebEngine getWebEngine() {
         return engine;
+    }
+
+    /**
+     * The call back implementation which is added for a custom action will be included in context menu of the editor.
+     *
+     * @param action {@link eu.mihosoft.monacofx.AbstractEditorAction} call back object as abstract action.
+     */
+    public void addContextMenuAction(AbstractEditorAction action) {
+        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
+            if (state == Worker.State.SUCCEEDED) {
+                String precondition = "null";
+                if(!action.isVisibleOnReadonly() && readOnly) {
+                    precondition = "\"false\"";
+                }
+                JSObject window = (JSObject) getWebEngine().executeScript("window");
+                String actionName = "customAction" + action.getLabel();
+                window.setMember(actionName, action);
+                String contextMenuOrder = "";
+                if (action.getContextMenuOrder() != null && !action.getContextMenuOrder().isEmpty()) {
+                    contextMenuOrder = "contextMenuOrder: " + action.getContextMenuOrder() + ",\n";
+                }
+                getWebEngine().executeScript(
+                    "editorView.addAction({\n" +
+                        "id: \"" + action.getActionId() + action.getLabel() + "\",\n" +
+                        "label: \"" + action.getLabel() + "\",\n" +
+                        "contextMenuGroupId: \"custom\",\n" +
+                        "precondition: " + precondition + ",\n" +
+                        contextMenuOrder +
+                        "run: (editor) => {" + actionName + ".action(); }\n" +
+                    "});"
+                );
+            }
+        });
+    }
+
+    /**
+     * pass readOnly option to the editor.
+     * @param readOnly boolean parameter to set the editor to read only or writable.
+     */
+    public void setReadonly(boolean readOnly) {
+        this.readOnly = readOnly;
+        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
+            if (state == Worker.State.SUCCEEDED) {
+                getWebEngine().executeScript(String.format("editorView.updateOptions({ readOnly: %s })", readOnly));
+            }
+        });
     }
 
 }
