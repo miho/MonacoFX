@@ -14,6 +14,7 @@ public abstract class AbstractEditorAction {
     private String label;
     private String contextMenuOrder;
 
+    private String runScript;
     /**
      * if this flag is set to true the action is visible in context menu.
      */
@@ -56,5 +57,13 @@ public abstract class AbstractEditorAction {
      *
      */
     abstract public void action();
+
+    public String getRunScript() {
+        return runScript;
+    }
+
+    public void setRunScript(String runScript) {
+        this.runScript = runScript;
+    }
 
 }

@@ -30,7 +30,7 @@
 
 <!--	<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    
+
     <style type="text/css">
         html, body {
             height: 100%;
@@ -122,20 +122,6 @@
            clipboardBridge.copy(editorView.getSelection());
            editorView.trigger('', 'cut');
         };
-
-        // adds 'paste' into the context menu
-        editorView.addAction({
-            id: "editor.action.clipboardPasteAction",
-            label: "Paste",
-            contextMenuGroupId: "9_cutcopypaste",
-            contextMenuOrder: 3,
-            run: (editor) => {
-                let position = editor.getPosition();
-                let newPosition = clipboardBridge.paste(editor.getSelection(), position);
-                editor.setPosition(newPosition);
-                editor.focus();
-            }
-        });
 
         if(editorCreatedCallback!=null) {
             editorCreatedCallback.apply([editorView]);

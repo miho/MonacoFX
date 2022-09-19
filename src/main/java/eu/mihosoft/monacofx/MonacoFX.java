@@ -100,8 +100,14 @@ public class MonacoFX extends Region {
             Object obj = engine.executeScript("editorView.getModel().getValueInRange(editorView.getSelection())");
             systemClipboardWrapper.handleCopyCutKeyEvent(event, obj);
         });
+
+        addPasteAction(clipboardBridge);
     }
 
+    private void addPasteAction(ClipboardBridge clipboardBridge) {
+        final PasteAction pasteAction = new PasteAction();
+        addContextMenuAction(pasteAction);
+    }
     @Override protected double computePrefWidth(double height) {
         return view.prefWidth(height);
     }
@@ -157,7 +163,10 @@ public class MonacoFX extends Region {
                         "contextMenuGroupId: \"custom\",\n" +
                         "precondition: " + precondition + ",\n" +
                         contextMenuOrder +
-                        "run: (editor) => {" + actionName + ".action(); }\n" +
+                        "run: (editor) => {" +
+                            actionName + ".action();\n" +
+                            action.getRunScript() +
+                        "}\n" +
                     "});"
                 );
             }
