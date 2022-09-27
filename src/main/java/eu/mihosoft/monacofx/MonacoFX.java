@@ -150,7 +150,7 @@ public class MonacoFX extends Region {
                     precondition = "\"false\"";
                 }
                 JSObject window = (JSObject) getWebEngine().executeScript("window");
-                String actionName = "customAction" + action.getLabel();
+                String actionName = action.getName();
                 window.setMember(actionName, action);
                 String contextMenuOrder = "";
                 if (action.getContextMenuOrder() != null && !action.getContextMenuOrder().isEmpty()) {
@@ -158,9 +158,9 @@ public class MonacoFX extends Region {
                 }
                 getWebEngine().executeScript(
                     "editorView.addAction({\n" +
-                        "id: \"" + action.getActionId() + action.getLabel() + "\",\n" +
+                        "id: \"" + action.getActionId() + actionName + "\",\n" +
                         "label: \"" + action.getLabel() + "\",\n" +
-                        "contextMenuGroupId: \"custom\",\n" +
+                        "contextMenuGroupId: \""+ action.getContextMenuGroupId() +"\",\n" +
                         "precondition: " + precondition + ",\n" +
                         contextMenuOrder +
                         "run: (editor) => {" +
@@ -173,17 +173,30 @@ public class MonacoFX extends Region {
         });
     }
 
+    @Override
+    public void requestFocus() {
+        super.requestFocus();
+        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
+            if (state == Worker.State.SUCCEEDED) {
+                getWebEngine().executeScript("editorView.focus();");
+            }
+        });
+    }
     /**
      * pass readOnly option to the editor.
      * @param readOnly boolean parameter to set the editor to read only or writable.
      */
     public void setReadonly(boolean readOnly) {
         this.readOnly = readOnly;
+        setOption("readOnly", readOnly);
+    }
+
+    public void setOption(String optionName, Object value) {
         getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
             if (state == Worker.State.SUCCEEDED) {
-                getWebEngine().executeScript(String.format("editorView.updateOptions({ readOnly: %s })", readOnly));
+                getWebEngine().executeScript(String.format("editorView.updateOptions({ " +
+                        optionName + ": %s })", value));
             }
         });
     }
-
 }

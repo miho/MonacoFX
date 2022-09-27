@@ -2,7 +2,7 @@ package eu.mihosoft.monacofx;
 
 /**
  * This is a Call Back class where the action method can be implemented for a custom usage.
- * Using @see {@link eu.mihosoft.monacofx.MonacoFX#addContextMenuAction} the implementation of this class can be added to
+ * Using @see {@link MonacoFX#addContextMenuAction} the implementation of this class can be added to
  * the context menu actions of the editor.
  */
 public abstract class AbstractEditorAction {
@@ -19,6 +19,8 @@ public abstract class AbstractEditorAction {
      * if this flag is set to true the action is visible in context menu.
      */
     private boolean visibleOnReadonly;
+    private String contextMenuGroupId;
+    private String name;
 
     public String getActionId() {
         return actionId;
@@ -66,4 +68,22 @@ public abstract class AbstractEditorAction {
         this.runScript = runScript;
     }
 
+    public String getContextMenuGroupId() {
+        return contextMenuGroupId;
+    }
+
+    public void setContextMenuGroupId(String contextMenuGroupId) {
+        this.contextMenuGroupId = contextMenuGroupId;
+    }
+
+    public String getName() {
+        if (name == null){
+            name = label;
+        }
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

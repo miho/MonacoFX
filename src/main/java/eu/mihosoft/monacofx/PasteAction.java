@@ -6,8 +6,10 @@ public class PasteAction extends AbstractEditorAction {
 
     public PasteAction() {
         setLabel("Paste");
+        setName("Paste");
         setActionId("editor.action.clipboardPasteAction");
         setContextMenuOrder("3");
+        setContextMenuGroupId("9_cutcopypaste");
         setVisibleOnReadonly(false);
         setRunScript("let position = editor.getPosition();\n"
                 + "let newPosition = clipboardBridge.paste(editor.getSelection(), position);\n"
