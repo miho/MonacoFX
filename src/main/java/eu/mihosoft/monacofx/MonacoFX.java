@@ -23,10 +23,8 @@
  */
 package eu.mihosoft.monacofx;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.concurrent.Worker;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -35,6 +33,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MonacoFX extends Region {
 
@@ -101,10 +102,13 @@ public class MonacoFX extends Region {
             systemClipboardWrapper.handleCopyCutKeyEvent(event, obj);
         });
 
-        addPasteAction(clipboardBridge);
     }
 
-    private void addPasteAction(ClipboardBridge clipboardBridge) {
+    protected void postConstruct() {
+        addPasteAction();
+    }
+
+    private void addPasteAction() {
         final PasteAction pasteAction = new PasteAction();
         addContextMenuAction(pasteAction);
     }
@@ -173,30 +177,27 @@ public class MonacoFX extends Region {
         });
     }
 
-    @Override
-    public void requestFocus() {
-        super.requestFocus();
-        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
-            if (state == Worker.State.SUCCEEDED) {
-                getWebEngine().executeScript("editorView.focus();");
-            }
-        });
+
+    public boolean isReadOnly() {
+        return readOnly;
     }
-    /**
-     * pass readOnly option to the editor.
-     * @param readOnly boolean parameter to set the editor to read only or writable.
-     */
+
     public void setReadonly(boolean readOnly) {
         this.readOnly = readOnly;
         setOption("readOnly", readOnly);
     }
 
     public void setOption(String optionName, Object value) {
-        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
-            if (state == Worker.State.SUCCEEDED) {
-                getWebEngine().executeScript(String.format("editorView.updateOptions({ " +
-                        optionName + ": %s })", value));
-            }
-        });
+        String script = String.format("editorView.updateOptions({ " + optionName + ": %s })", value);
+        ReadOnlyObjectProperty<Worker.State> stateProperty = getWebEngine().getLoadWorker().stateProperty();
+        if (Worker.State.SUCCEEDED == stateProperty.getValue()) {
+            getWebEngine().executeScript(script);
+        } else {
+            getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
+                if (Worker.State.SUCCEEDED == state) {
+                    getWebEngine().executeScript(script);
+                }
+            });
+        }
     }
 }
