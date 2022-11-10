@@ -38,6 +38,7 @@ public class SystemClipboardWrapper {
 
 	private final KeyCodeCombination KEY_CODE_CTRL_C = new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN);
 	private final KeyCodeCombination KEY_CODE_CTRL_X = new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCodeCombination KEY_CODE_CTRL_INSERT = new KeyCodeCombination(KeyCode.INSERT, KeyCombination.SHORTCUT_DOWN);
 
 	/**
 	 * Puts the text into clipboard.
@@ -58,7 +59,10 @@ public class SystemClipboardWrapper {
 	 * @param obj cut or copied text object.
 	 */
 	public void handleCopyCutKeyEvent(KeyEvent event, Object obj) {
-		if (event.getEventType().getName().equals("KEY_PRESSED") && KEY_CODE_CTRL_X.match(event) || (KEY_CODE_CTRL_C.match(event))) {
+		if (event.getEventType().getName().equals("KEY_PRESSED")
+				&& KEY_CODE_CTRL_X.match(event)
+				|| (KEY_CODE_CTRL_C.match(event))
+				|| (KEY_CODE_CTRL_INSERT.match(event))) {
 			String selectedText = String.valueOf(obj);
 			if (selectedText.isEmpty()) {
 				event.consume();

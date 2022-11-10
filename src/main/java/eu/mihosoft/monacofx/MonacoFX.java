@@ -34,8 +34,10 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class MonacoFX extends Region {
 
@@ -155,6 +157,7 @@ public class MonacoFX extends Region {
                 }
                 JSObject window = (JSObject) getWebEngine().executeScript("window");
                 String actionName = action.getName();
+                String keyBindings = Arrays.stream(action.getKeyBindings()).collect(Collectors.joining(","));
                 window.setMember(actionName, action);
                 String contextMenuOrder = "";
                 if (action.getContextMenuOrder() != null && !action.getContextMenuOrder().isEmpty()) {
@@ -166,6 +169,7 @@ public class MonacoFX extends Region {
                         "label: \"" + action.getLabel() + "\",\n" +
                         "contextMenuGroupId: \""+ action.getContextMenuGroupId() +"\",\n" +
                         "precondition: " + precondition + ",\n" +
+                        "keybindings: [" + keyBindings + "],\n" +
                         contextMenuOrder +
                         "run: (editor) => {" +
                             actionName + ".action();\n" +

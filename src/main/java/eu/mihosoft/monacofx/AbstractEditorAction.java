@@ -22,6 +22,8 @@ public abstract class AbstractEditorAction {
     private String contextMenuGroupId;
     private String name;
 
+    private String[] keyBindings = new String[]{};
+
     public String getActionId() {
         return actionId;
     }
@@ -85,5 +87,13 @@ public abstract class AbstractEditorAction {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String[] getKeyBindings() {
+        return keyBindings;
+    }
+
+    public void setKeyBindings(String... keyBindings) {
+        this.keyBindings = keyBindings;
     }
 }
