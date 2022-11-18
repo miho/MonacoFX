@@ -30,6 +30,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 
 /**
  * Wrapper class to make the clipboard functionality testable.
@@ -56,13 +57,14 @@ public class SystemClipboardWrapper {
 	 * When ever KeyEvent.KEY_PRESSED with 'Ctrl x' or 'Ctrl c' happens the passed string obj is copied in
 	 * to the clipboard
 	 * @param event key event
-	 * @param obj cut or copied text object.
+	 * @param getSelectionObjectCallBack
 	 */
-	public void handleCopyCutKeyEvent(KeyEvent event, Object obj) {
+	public void handleCopyCutKeyEvent(KeyEvent event, Callback<Void, Object> getSelectionObjectCallBack) {
 		if (event.getEventType().getName().equals("KEY_PRESSED")
 				&& KEY_CODE_CTRL_X.match(event)
 				|| (KEY_CODE_CTRL_C.match(event))
 				|| (KEY_CODE_CTRL_INSERT.match(event))) {
+			Object obj = getSelectionObjectCallBack.call(null);
 			String selectedText = String.valueOf(obj);
 			if (selectedText.isEmpty()) {
 				event.consume();

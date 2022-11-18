@@ -68,50 +68,25 @@
 	require(['vs/editor/editor.main'], function() {
 
 		editorView = monaco.editor.create(document.getElementById('container'), {
-
-			//theme: 'mylangTheme',
-
 			value: getCode(),
-
-			//language: 'mylang',
-
             automaticLayout: true,
-
             roundedSelection: false,
-
 			mouseWheelScrollSensitivity: 0.1,
-
 			scrollBeyondLastLine: false,
-
             fontSize: "12px",
-
             wordWrapColumn: 80,
             wordWrapMinified: true,
-            // try "same", "indent" or "none"
             wrappingIndent: 'indent',
-
+            links: false,
             scrollbar: {
-                // Subtle shadows to the left & top. Defaults to true.
                 useShadows: true,
-
-                // Render vertical arrows. Defaults to false.
                 verticalHasArrows: true,
-                // Render horizontal arrows. Defaults to false.
                 horizontalHasArrows: true,
-
-                // Render vertical scrollbar.
-                // Accepted values: 'auto', 'visible', 'hidden'.
-                // Defaults to 'auto'
                 vertical: 'auto',
-                // Render horizontal scrollbar.
-                // Accepted values: 'auto', 'visible', 'hidden'.
-                // Defaults to 'auto'
                 horizontal: 'auto',
-
                 verticalScrollbarSize: 17,
                 horizontalScrollbarSize: 17,
                 arrowSize: 30,
-
 				alwaysConsumeMouseWheel: false
 	        }
 
