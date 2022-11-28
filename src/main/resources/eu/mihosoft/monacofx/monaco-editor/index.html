@@ -51,7 +51,7 @@
 
 <body>
 <div id="container"></div>
-
+<script src="./package/min/vs/ResizeObserver.js"></script>
 <script src="./package/min/vs/loader.js"></script>
 
 <script>
@@ -77,33 +77,35 @@
             wordWrapColumn: 80,
             wordWrapMinified: true,
             wrappingIndent: 'indent',
-            links: false,
-            scrollbar: {
-                useShadows: true,
-                verticalHasArrows: true,
-                horizontalHasArrows: true,
-                vertical: 'auto',
-                horizontal: 'auto',
-                verticalScrollbarSize: 17,
-                horizontalScrollbarSize: 17,
-                arrowSize: 30,
-				alwaysConsumeMouseWheel: false
-	        }
-
+            links: false
         });
 
-        // overrides the context menu 'copy'
-        let copyAction = editorView.getAction('editor.action.clipboardCopyAction');
-        copyAction.run = function () {
-           clipboardBridge.copy(editorView.getSelection());
-        };
+        monaco.editor.addKeybindingRules([
+            {
+              // disable show command center
+              keybinding: monaco.KeyCode.F1,
+              command: null,
+            },
+            {
+              keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+              command: null, //monaco.KeyMod.CtrlCmd | monaco.KeyCode.Key,
+            },
+            {
+              // disable toggle debugger breakpoint
+              keybinding: monaco.KeyCode.F9,
+              command: null,
+            }
+        ]);
 
-       // overrides the context menu 'cut'
-        let cutAction = editorView.getAction('editor.action.clipboardCutAction');
-        cutAction.run = function () {
-           clipboardBridge.copy(editorView.getSelection());
-           editorView.trigger('', 'cut');
-        };
+        editorView.addAction({
+           id: 'editor.action.clipboardCopyAction',
+           label: 'Copy',
+           contextMenuGroupId: '9_cutcopypaste',
+           keybindings: [ monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC ],
+           run: () => {
+              clipboardBridge.copy(editorView.getSelection());
+           },
+        });
 
         if(editorCreatedCallback!=null) {
             editorCreatedCallback.apply([editorView]);

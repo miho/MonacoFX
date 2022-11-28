@@ -109,6 +109,13 @@ public class ClipboardBridge {
 	}
 
 	private int getNumber(JSObject selection, String startLineNumber) {
-		return Integer.parseInt(String.valueOf(selection.getMember(startLineNumber)));
+		int number = 0;
+		Object selectionMember = selection.getMember(startLineNumber);
+		if (selectionMember instanceof Integer) {
+			number = (Integer) selectionMember;
+		} else if (selectionMember instanceof Double) {
+			number = ((Double) selectionMember).intValue();
+		}
+		return number;
 	}
 }

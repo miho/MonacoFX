@@ -53,7 +53,7 @@ public class MonacoFX extends Region {
     private final WebView view;
     private final WebEngine engine;
 
-    private final static String EDITOR_HTML_RESOURCE_LOCATION = "/eu/mihosoft/monacofx/monaco-editor-0.20.0/index.html";
+    private final static String EDITOR_HTML_RESOURCE_LOCATION = "/eu/mihosoft/monacofx/monaco-editor/index.html";
 
     private final Editor editor;
     private final SystemClipboardWrapper systemClipboardWrapper;
@@ -61,6 +61,7 @@ public class MonacoFX extends Region {
 
     public MonacoFX() {
         view = new WebView();
+
         getChildren().add(view);
         engine = view.getEngine();
         String url = getClass().getResource(EDITOR_HTML_RESOURCE_LOCATION).toExternalForm();
@@ -139,15 +140,20 @@ public class MonacoFX extends Region {
         view.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
             double deltaY = e.getDeltaY();
             if (deltaY > 0) {
-                r.keyPress(KeyCode.PAGE_UP);
-                r.keyRelease(KeyCode.PAGE_UP);
+                pressArrowKey(r, KeyCode.UP, 3);
                 e.consume();
             } else if (deltaY < 0) {
-                r.keyPress(KeyCode.PAGE_DOWN);
-                r.keyRelease(KeyCode.PAGE_DOWN);
+                pressArrowKey(r, KeyCode.DOWN, 3);
                 e.consume();
             }
         });
+    }
+
+    private static void pressArrowKey(Robot r, KeyCode up, int count) {
+        for (int i = 0; i <count; i++) {
+            r.keyPress(up);
+            r.keyRelease(up);
+        }
     }
 
     @Override
@@ -162,11 +168,17 @@ public class MonacoFX extends Region {
 
     protected void postConstruct() {
         addPasteAction();
+        addCutAction();
     }
 
     private void addPasteAction() {
         final PasteAction pasteAction = new PasteAction();
         addContextMenuAction(pasteAction);
+    }
+
+    private void addCutAction() {
+        final CutAction cutAction = new CutAction();
+        addContextMenuAction(cutAction);
     }
     @Override protected double computePrefWidth(double height) {
         return view.prefWidth(height);
@@ -258,10 +270,10 @@ public class MonacoFX extends Region {
                             "keybindings: [" + keyBindings + "],\n" +
                             contextMenuOrder +
                             "run: (editor) => {" +
-                            actionName + ".action();\n" +
-                            action.getRunScript() +
+                               actionName + ".action();\n" +
+                               action.getRunScript() +
                             "}\n" +
-                            "});"
+                        "});"
             );
         } catch (JSException exception) {
             LOGGER.log(Level.SEVERE, exception.getMessage());
