@@ -28,19 +28,19 @@
 <html>
 <head>
 
-<!--	<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    
+    <!--	<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
     <style type="text/css">
         html, body {
             height: 100%;
             margin: 0;
         }
 
-		body {
-			overflow-x: hidden;
-			overflow-y: hidden;
-		}
+        body {
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
 
         #container {
             height: 100%;
@@ -55,24 +55,21 @@
 <script src="./package/min/vs/loader.js"></script>
 
 <script>
-
     var editorCreatedCallback;
+    var editorView;
+    var contentChangeListener;
+    var scrollChangeListener;
 
-	var foldingProvider;
-	var editorView;
-	var contentChangeListener;
-	var scrollChangeListener;
+    require.config({paths: {'vs': './package/min/vs'}});
 
-	require.config({ paths: { 'vs': './package/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
 
-	require(['vs/editor/editor.main'], function() {
-
-		editorView = monaco.editor.create(document.getElementById('container'), {
-			value: getCode(),
+        editorView = monaco.editor.create(document.getElementById('container'), {
+            value: getCode(),
             automaticLayout: true,
             roundedSelection: false,
-			mouseWheelScrollSensitivity: 0.1,
-			scrollBeyondLastLine: false,
+            mouseWheelScrollSensitivity: 0.1,
+            scrollBeyondLastLine: false,
             fontSize: "12px",
             wordWrapColumn: 80,
             wordWrapMinified: true,
@@ -81,49 +78,48 @@
         });
 
         monaco.editor.addKeybindingRules([
-            {
-              // disable show command center
-              keybinding: monaco.KeyCode.F1,
-              command: null,
+            { // disable show command center
+                keybinding: monaco.KeyCode.F1,
+                command: null,
             },
             {
-              keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-              command: null, //monaco.KeyMod.CtrlCmd | monaco.KeyCode.Key,
+                keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                command: null,
             },
-            {
-              // disable toggle debugger breakpoint
-              keybinding: monaco.KeyCode.F9,
-              command: null,
+            { // disable toggle debugger breakpoint
+                keybinding: monaco.KeyCode.F9,
+                command: null,
             }
         ]);
 
+
         editorView.addAction({
-           id: 'editor.action.clipboardCopyAction',
-           label: 'Copy',
-           contextMenuGroupId: '9_cutcopypaste',
-           keybindings: [ monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC ],
-           run: () => {
-              clipboardBridge.copy(editorView.getSelection());
-           },
+            id: 'editor.action.clipboardCopyAction',
+            label: 'Copy',
+            contextMenuGroupId: '9_cutcopypaste',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC],
+            run: () => {
+                clipboardBridge.copy(editorView.getSelection());
+            },
         });
 
-        if(editorCreatedCallback!=null) {
+        if (editorCreatedCallback != null) {
             editorCreatedCallback.apply([editorView]);
         }
 
-		editorView.onDidChangeModelContent((ev) => {
-            if(contentChangeListener!=null) {
-               contentChangeListener.apply([ev]);
+        editorView.onDidChangeModelContent((ev) => {
+            if (contentChangeListener != null) {
+                contentChangeListener.apply([ev]);
             }
         });
 
-		editorView.onDidScrollChange((ev) => {
-            if(scrollChangeListener!=null) {
-               scrollChangeListener.apply([ev]);
+        editorView.onDidScrollChange((ev) => {
+            if (scrollChangeListener != null) {
+                scrollChangeListener.apply([ev]);
             }
         });
 
-		// UNDO-/REDO functionality
+        // UNDO-/REDO functionality
         const initialVersion = editorView.getModel().getAlternativeVersionId();
         let currentVersion = initialVersion;
         let lastVersion = initialVersion;
@@ -161,7 +157,7 @@
             currentVersion = versionId;
         });
 
-	});
+    });
 
     function undo() {
         editorView.trigger('aaaa', 'undo', 'aaaa');
@@ -173,13 +169,13 @@
         editorView.focus();
     }
 
-	function getCode() {
+    function getCode() {
 
-		return [
-			''
-		].join('\n');
+        return [
+            ''
+        ].join('\n');
 
-	}
+    }
 
     // change the text without losing document history
     function updateText(text) {
@@ -191,8 +187,8 @@
         editorView.pushUndoStop();
     }
 
-	function getEditorView() {
-		return editorView;
+    function getEditorView() {
+        return editorView;
     }
 
 </script>

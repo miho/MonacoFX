@@ -65,7 +65,6 @@ public class MonacoFX extends Region {
         getChildren().add(view);
         engine = view.getEngine();
         String url = getClass().getResource(EDITOR_HTML_RESOURCE_LOCATION).toExternalForm();
-        engine.load(url);
 
         editor = new Editor(engine);
 
@@ -73,21 +72,14 @@ public class MonacoFX extends Region {
         ClipboardBridge clipboardBridge = new ClipboardBridge(getEditor().getDocument(), systemClipboardWrapper);
         engine.getLoadWorker().stateProperty().addListener((o, old, state) -> {
             if (state == Worker.State.SUCCEEDED) {
-                JSObject window = (JSObject) engine.executeScript("window");
-                window.setMember("clipboardBridge", clipboardBridge);
-
                 AtomicBoolean jsDone = new AtomicBoolean(false);
                 AtomicInteger attempts = new AtomicInteger();
-
                 Thread thread = new Thread(() -> {
                     while (!jsDone.get()) {
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                         // check if JS execution is done.
                         Platform.runLater(() -> {
+                            JSObject window = (JSObject) engine.executeScript("window");
+                            window.setMember("clipboardBridge", clipboardBridge);
                             Object jsEditorObj = window.call("getEditorView");
                             if (jsEditorObj instanceof JSObject) {
                                 editor.setEditor(window, (JSObject) jsEditorObj);
@@ -100,16 +92,22 @@ public class MonacoFX extends Region {
                                 "Cannot initialize editor (JS execution not complete). Max number of attempts reached."
                             );
                         }
+                        if (!jsDone.get()) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 });
                 thread.start();
             }
         });
-
+        engine.load(url);
         addClipboardFunctions();
         addMouseWheelZoom();
         avoidMouseWheelScrollJumps();
-
     }
 
     private void addClipboardFunctions() {
@@ -286,12 +284,35 @@ public class MonacoFX extends Region {
             callback.call(parameter);
         } else {
             getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
-                try {
-                    if (Worker.State.SUCCEEDED == state) {
-                        callback.call(parameter);
-                    }
-                } catch (JSException exception) {
-                    LOGGER.log(Level.SEVERE, exception.getMessage());
+                if (Worker.State.SUCCEEDED == state) {
+                    JSObject window = (JSObject) engine.executeScript("window");
+                    AtomicBoolean jsDone = new AtomicBoolean(false);
+                    AtomicInteger attempts = new AtomicInteger();
+                    Thread thread = new Thread(() -> {
+                        while (!jsDone.get()) {
+                            // check if JS execution is done.
+                            Platform.runLater(() -> {
+                                Object jsEditorObj = window.call("getEditorView");
+                                if (jsEditorObj instanceof JSObject) {
+                                    callback.call(parameter);
+                                    jsDone.set(true);
+                                }
+                            });
+                            if(attempts.getAndIncrement()> 10) {
+                                throw new RuntimeException(
+                                        "Cannot initialize editor (JS execution not complete). Max number of attempts reached."
+                                );
+                            }
+                            if (!jsDone.get()) {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                    thread.start();
                 }
             });
         }

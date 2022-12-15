@@ -10,3 +10,5 @@ build
 .vscode
 bin/
 .settings
+/src/main/resources/eu/mihosoft/monacofx/monaco-editor/package/dev/
+/src/main/resources/eu/mihosoft/monacofx/monaco-editor/package/esm/
