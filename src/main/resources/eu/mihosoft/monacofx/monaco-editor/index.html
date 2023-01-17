@@ -68,7 +68,9 @@
             value: getCode(),
             automaticLayout: true,
             roundedSelection: false,
-            mouseWheelScrollSensitivity: 0.1,
+            mouseWheelScrollSensitivity: 1,
+            mouseWheelZoom: true,
+            smoothScrolling: true,
             scrollBeyondLastLine: false,
             fontSize: "12px",
             wordWrapColumn: 80,
@@ -158,6 +160,15 @@
         });
 
     });
+
+    function isQuickAccessOpen() {
+        const domNode = editorView._overlayWidgets["editor.contrib.quickInputWidget"].widget.domNode;
+        if(!domNode || !domNode.children[0]) {
+            return false;
+        }
+        let opened = domNode.children[0].style.display != "none";
+        return opened;
+    }
 
     function undo() {
         editorView.trigger('aaaa', 'undo', 'aaaa');

@@ -106,7 +106,6 @@ public class MonacoFX extends Region {
         });
         engine.load(url);
         addClipboardFunctions();
-        addMouseWheelZoom();
         avoidMouseWheelScrollJumps();
     }
 
@@ -118,40 +117,29 @@ public class MonacoFX extends Region {
         return engine.executeScript("editorView.getModel().getValueInRange(editorView.getSelection())");
     }
 
-    private void addMouseWheelZoom() {
+    private void avoidMouseWheelScrollJumps() {
+        Robot r = new Robot();
         view.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
-            if (e.isControlDown()) {
+            JSObject window = (JSObject) engine.executeScript("window");
+            Boolean isQuickAccessOpen = (Boolean) window.call("isQuickAccessOpen");
+            if (isQuickAccessOpen) {
                 double deltaY = e.getDeltaY();
                 if (deltaY > 0) {
-                    view.setZoom(view.getZoom() * 1.1);
+                    pressArrowKey(r, KeyCode.UP, 3);
                     e.consume();
                 } else if (deltaY < 0) {
-                    view.setZoom(view.getZoom() / 1.1);
+                    pressArrowKey(r, KeyCode.DOWN, 3);
                     e.consume();
                 }
             }
         });
     }
 
-    private void avoidMouseWheelScrollJumps() {
-        Robot r = new Robot();
-        view.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
-            double deltaY = e.getDeltaY();
-            if (deltaY > 0) {
-                pressArrowKey(r, KeyCode.UP, 3);
-                e.consume();
-            } else if (deltaY < 0) {
-                pressArrowKey(r, KeyCode.DOWN, 3);
-                e.consume();
-            }
-        });
-    }
-
-    private static void pressArrowKey(Robot r, KeyCode up, int count) {
+    private static void pressArrowKey(Robot r, KeyCode keyCode, int count) {
         for (int i = 0; i <count; i++) {
-            r.keyPress(up);
-            r.keyRelease(up);
+            r.keyPress(keyCode);
         }
+        r.keyRelease(keyCode);
     }
 
     @Override
@@ -218,15 +206,6 @@ public class MonacoFX extends Region {
             return null;
         });
     }
-
-//    public void removeContextMenuAction(String actionId) {
-//        String script = String.format("editorView.removeActionById('%s')", actionId);
-//        executeJavaScriptLambda(script, param -> {
-//            getWebEngine().executeScript(script);
-//            return null;
-//        });
-//    }
-
 
     public boolean isReadOnly() {
         return readOnly;
