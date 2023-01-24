@@ -24,7 +24,6 @@
 package eu.mihosoft.monacofx;
 
 import netscape.javascript.JSObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;

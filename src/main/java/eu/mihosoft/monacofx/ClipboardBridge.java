@@ -93,6 +93,7 @@ public class ClipboardBridge {
 	}
 
 	private String addPasteString(JSObject jsSelection, String pasteString, String originText) {
+		// https://stackoverflow.com/questions/14602062/java-string-split-removed-empty-values
 		String[] lines = originText.split("\n", -1);
 		int startLineNumber = getNumber(jsSelection, "startLineNumber") - 1;
 		int startColumn = getNumber(jsSelection, "startColumn") - 1;
