@@ -106,7 +106,11 @@ public class MonacoFX extends Region {
         });
         engine.load(url);
         addClipboardFunctions();
-        avoidMouseWheelScrollJumps();
+    }
+
+    public void reload() {
+        engine.reload();
+        setReadonly(isReadOnly());
     }
 
     private void addClipboardFunctions() {
@@ -115,24 +119,6 @@ public class MonacoFX extends Region {
 
     private Object getSelectionObject() {
         return engine.executeScript("editorView.getModel().getValueInRange(editorView.getSelection())");
-    }
-
-    private void avoidMouseWheelScrollJumps() {
-        Robot r = new Robot();
-        view.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
-            JSObject window = (JSObject) engine.executeScript("window");
-            Boolean isQuickAccessOpen = (Boolean) window.call("isQuickAccessOpen");
-            if (isQuickAccessOpen) {
-                double deltaY = e.getDeltaY();
-                if (deltaY > 0) {
-                    pressArrowKey(r, KeyCode.UP, 3);
-                    e.consume();
-                } else if (deltaY < 0) {
-                    pressArrowKey(r, KeyCode.DOWN, 3);
-                    e.consume();
-                }
-            }
-        });
     }
 
     private static void pressArrowKey(Robot r, KeyCode keyCode, int count) {

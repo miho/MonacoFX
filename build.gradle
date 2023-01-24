@@ -33,7 +33,7 @@ jar {
         attributes('Automatic-Module-Name': 'eu.mihosoft.monacofx')
     }
     processResources.exclude(
-            "eu/mihosoft/monacofx/monaco-editor-0.20.0/package/dev")
+            "eu/mihosoft/monacofx/monaco-editor/package/dev")
     // // add velocity legacy to jar file
     // from {
     //     configurations.legacyVelocity.collect { it.isDirectory() ? it : zipTree(it) }

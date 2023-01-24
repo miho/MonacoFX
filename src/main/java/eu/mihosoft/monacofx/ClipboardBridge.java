@@ -26,6 +26,10 @@ package eu.mihosoft.monacofx;
 
 import netscape.javascript.JSObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Bridge between javascript code and java to add and use system clipboard functionality.
  */
@@ -88,15 +92,19 @@ public class ClipboardBridge {
 		return position;
 	}
 
-
 	private String addPasteString(JSObject jsSelection, String pasteString, String originText) {
-		String[] lines = originText.split("\n");
+		String[] lines = originText.split("\n", -1);
 		int startLineNumber = getNumber(jsSelection, "startLineNumber") - 1;
 		int startColumn = getNumber(jsSelection, "startColumn") - 1;
-		String beforeMousePosition = lines[startLineNumber].substring(0, startColumn);
-		String afterMousePosition = lines[startLineNumber].substring(startColumn);
-		String lineChanged = beforeMousePosition + pasteString + afterMousePosition;
-		lines[startLineNumber] = lineChanged;
+		if (startLineNumber < lines.length) {
+			String beforeMousePosition = lines[startLineNumber].substring(0, startColumn);
+			String afterMousePosition = lines[startLineNumber].substring(startColumn);
+			lines[startLineNumber] = beforeMousePosition + pasteString + afterMousePosition;;
+		} else {
+			List<String> list = new ArrayList<>(Arrays.asList(lines));
+			list.add(pasteString);
+			lines = list.toArray(new String[0]);
+		}
 		return String.join("\n", lines);
 	}
 
