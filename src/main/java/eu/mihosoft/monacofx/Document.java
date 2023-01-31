@@ -25,6 +25,7 @@ package eu.mihosoft.monacofx;
 
 import javafx.beans.property.*;
 import javafx.scene.web.WebEngine;
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 public class Document {
@@ -89,7 +90,11 @@ public class Document {
             }finally {
                 updatingText=false;
             }
-            editor.call("setValue", text);
+            try {
+                editor.call("setValue", text);
+            } catch (JSException jsException) {
+                textProperty.set(text);
+            }
         }
     }
 
