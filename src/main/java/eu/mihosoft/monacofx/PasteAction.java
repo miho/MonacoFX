@@ -11,7 +11,8 @@ public class PasteAction extends AbstractEditorAction {
         setContextMenuOrder("3");
         setContextMenuGroupId("9_cutcopypaste");
         setVisibleOnReadonly(false);
-        setKeyBindings("monaco.KeyMod.Shift & monaco.KeyCode.Insert");
+        setKeyBindings("monaco.KeyMod.Shift | monaco.KeyCode.Insert",
+                "monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV");
         setRunScript("let position = editor.getPosition();\n"
                 + "let newPosition = clipboardBridge.paste(editor.getSelection(), position);\n"
                 + "editor.setPosition(newPosition);\n"
