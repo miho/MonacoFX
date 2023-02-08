@@ -1,0 +1,211 @@
+<!--
+
+    MIT License
+
+    Copyright (c) 2020-2022 Michael Hoffer <info@michaelhoffer.de>. All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+-->
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <!--	<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+
+        #container {
+            height: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="container"></div>
+<script src="./package/min/vs/ResizeObserver.js"></script>
+<script src="./package/min/vs/loader.js"></script>
+
+<script>
+    var editorCreatedCallback;
+    var editorView;
+    var contentChangeListener;
+    var scrollChangeListener;
+
+    require.config({paths: {'vs': './package/min/vs'}});
+
+    require(['vs/editor/editor.main'], function () {
+
+        editorView = monaco.editor.create(document.getElementById('container'), {
+            value: getCode(),
+            automaticLayout: true,
+            roundedSelection: false,
+            mouseWheelScrollSensitivity: 1,
+            mouseWheelZoom: true,
+            smoothScrolling: true,
+            scrollBeyondLastLine: false,
+            fontSize: "12px",
+            wordWrapColumn: 80,
+            wordWrapMinified: true,
+            wrappingIndent: 'indent',
+            links: false
+        });
+
+        monaco.editor.addKeybindingRules([
+            { // disable show command center
+                keybinding: monaco.KeyCode.F1,
+                command: null,
+            },
+            {
+                keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                command: null,
+            },
+            { // disable toggle debugger breakpoint
+                keybinding: monaco.KeyCode.F9,
+                command: null,
+            }
+        ]);
+
+        const model = editorView.getModel();
+        model.setEOL(monaco.editor.EndOfLineSequence.LF);
+
+        editorView.addAction({
+            id: 'editor.action.clipboardCopyAction',
+            label: 'Copy',
+            contextMenuGroupId: '9_cutcopypaste',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC],
+            run: () => {
+                clipboardBridge.copy(editorView.getSelection());
+            },
+        });
+
+        if (editorCreatedCallback != null) {
+            editorCreatedCallback.apply([editorView]);
+        }
+
+        editorView.onDidChangeModelContent((ev) => {
+            if (contentChangeListener != null) {
+                contentChangeListener.apply([ev]);
+            }
+        });
+
+        editorView.onDidScrollChange((ev) => {
+            if (scrollChangeListener != null) {
+                scrollChangeListener.apply([ev]);
+            }
+        });
+
+        // UNDO-/REDO functionality
+        const initialVersion = editorView.getModel().getAlternativeVersionId();
+        let currentVersion = initialVersion;
+        let lastVersion = initialVersion;
+        editorView.onDidChangeModelContent(e => {
+            const versionId = editorView.getModel().getAlternativeVersionId();
+            // undoing
+            if (versionId < currentVersion) {
+                // REDO AVAILABLE
+                // enableRedoButton();
+
+                // no more undo possible
+                if (versionId === initialVersion) {
+                    // UNDO NOT AVAILABLE
+                    // disableUndoButton();
+                }
+            } else {
+                // redoing
+                if (versionId <= lastVersion) {
+                    // redoing the last change
+                    if (versionId == lastVersion) {
+                        // REDO NOT AVAILABLE
+                        // disableRedoButton();
+                    }
+                } else { // adding new change, disable redo when adding new changes
+                    // REDO NOT AVAILABLE
+                    // disableRedoButton();
+                    if (currentVersion > lastVersion) {
+                        lastVersion = currentVersion;
+                    }
+                }
+
+                // UNDO AVAILABLE
+                // enableUndoButton();
+            }
+            currentVersion = versionId;
+        });
+
+    });
+
+    function isQuickAccessOpen() {
+        const domNode = editorView._overlayWidgets["editor.contrib.quickInputWidget"].widget.domNode;
+        if(!domNode || !domNode.children[0]) {
+            return false;
+        }
+        let opened = domNode.children[0].style.display != "none";
+        return opened;
+    }
+
+    function undo() {
+        editorView.trigger('aaaa', 'undo', 'aaaa');
+        editorView.focus();
+    }
+
+    function redo() {
+        editorView.trigger('aaaa', 'redo', 'aaaa');
+        editorView.focus();
+    }
+
+    function getCode() {
+
+        return [
+            ''
+        ].join('\n');
+
+    }
+
+    // change the text without losing document history
+    function updateText(text) {
+        const fullRange = editorView.getModel().getFullModelRange();
+        editorView.executeEdits(null, [{
+            text: text,
+            range: fullRange
+        }]);
+        editorView.pushUndoStop();
+    }
+
+    function getEditorView() {
+        return editorView;
+    }
+
+</script>
+
+</body>
+
+</html>

@@ -110,4 +110,7 @@ task to run the project.
 
 
 
+##### monaco version could be increased to 0.34.1
+The upgrade caused an exception related to ResizeObserver. Adding the following JavaScript closed this gap:
 
+```https://raw.githubusercontent.com/que-etc/resize-observer-polyfill/master/dist/ResizeObserver.js```

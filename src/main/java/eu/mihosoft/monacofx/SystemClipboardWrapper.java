@@ -30,6 +30,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 
 /**
  * Wrapper class to make the clipboard functionality testable.
@@ -38,6 +39,8 @@ public class SystemClipboardWrapper {
 
 	private final KeyCodeCombination KEY_CODE_CTRL_C = new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN);
 	private final KeyCodeCombination KEY_CODE_CTRL_X = new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCodeCombination KEY_CODE_CTRL_INSERT = new KeyCodeCombination(KeyCode.INSERT, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCodeCombination KEY_CODE_CTRL_DELETE = new KeyCodeCombination(KeyCode.DELETE, KeyCombination.SHORTCUT_DOWN);
 
 	/**
 	 * Puts the text into clipboard.
@@ -54,13 +57,24 @@ public class SystemClipboardWrapper {
 	/**
 	 * When ever KeyEvent.KEY_PRESSED with 'Ctrl x' or 'Ctrl c' happens the passed string obj is copied in
 	 * to the clipboard
-	 * @param event key event
-	 * @param obj cut or copied text object.
+	 *
+	 * @param event                      key event
+	 * @param getSelectionObjectCallBack
+	 * @param readOnly
 	 */
-	public void handleCopyCutKeyEvent(KeyEvent event, Object obj) {
-		if (event.getEventType().getName().equals("KEY_PRESSED") && KEY_CODE_CTRL_X.match(event) || (KEY_CODE_CTRL_C.match(event))) {
+	public void handleCopyCutKeyEvent(KeyEvent event, Callback<Void, Object> getSelectionObjectCallBack, boolean readOnly) {
+		if (event.getEventType().getName().equals("KEY_PRESSED")
+				&& KEY_CODE_CTRL_X.match(event)
+				|| KEY_CODE_CTRL_C.match(event)
+				|| KEY_CODE_CTRL_DELETE.match(event)
+				|| KEY_CODE_CTRL_INSERT.match(event)) {
+			Object obj = getSelectionObjectCallBack.call(null);
 			String selectedText = String.valueOf(obj);
-			if (selectedText.isEmpty()) {
+			if ((readOnly && KEY_CODE_CTRL_X.match(event))
+					|| (readOnly && KEY_CODE_CTRL_INSERT.match(event))
+					|| (readOnly && KEY_CODE_CTRL_DELETE.match(event))
+					|| selectedText.isEmpty()
+			) {
 				event.consume();
 			} else {
 				Platform.runLater(() -> {
