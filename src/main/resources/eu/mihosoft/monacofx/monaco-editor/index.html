@@ -94,6 +94,8 @@
             }
         ]);
 
+        const model = editorView.getModel();
+        model.setEOL(monaco.editor.EndOfLineSequence.LF);
 
         editorView.addAction({
             id: 'editor.action.clipboardCopyAction',

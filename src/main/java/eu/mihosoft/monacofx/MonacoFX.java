@@ -23,19 +23,23 @@
  */
 package eu.mihosoft.monacofx;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.robot.Robot;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
@@ -59,6 +63,9 @@ public class MonacoFX extends Region {
     private final SystemClipboardWrapper systemClipboardWrapper;
     private boolean readOnly;
 
+    private Worker.State workerState;
+    private Timeline oneSecondWonder;
+
     public MonacoFX() {
         view = new WebView();
 
@@ -71,6 +78,7 @@ public class MonacoFX extends Region {
         systemClipboardWrapper = new SystemClipboardWrapper();
         ClipboardBridge clipboardBridge = new ClipboardBridge(getEditor().getDocument(), systemClipboardWrapper);
         engine.getLoadWorker().stateProperty().addListener((o, old, state) -> {
+            workerState = state;
             if (state == Worker.State.SUCCEEDED) {
                 AtomicBoolean jsDone = new AtomicBoolean(false);
                 AtomicInteger attempts = new AtomicInteger();
@@ -105,7 +113,21 @@ public class MonacoFX extends Region {
             }
         });
         engine.load(url);
+        waitForLoad();
         addClipboardFunctions();
+    }
+
+    /**
+     * wait a bit
+     */
+    private void waitForLoad() {
+        oneSecondWonder = new Timeline(new KeyFrame(Duration.seconds(1), (ActionEvent event) -> {
+            if ( Worker.State.SUCCEEDED == workerState) {
+                oneSecondWonder.stop();
+            }
+        }));
+        oneSecondWonder.setCycleCount(15);
+        oneSecondWonder.play();
     }
 
     public void reload() {
@@ -114,7 +136,7 @@ public class MonacoFX extends Region {
     }
 
     private void addClipboardFunctions() {
-        addEventFilter(KeyEvent.KEY_PRESSED, event -> systemClipboardWrapper.handleCopyCutKeyEvent(event, (a) -> getSelectionObject()));
+        addEventFilter(KeyEvent.KEY_PRESSED, event -> systemClipboardWrapper.handleCopyCutKeyEvent(event, (a) -> getSelectionObject(), readOnly));
     }
 
     private Object getSelectionObject() {
@@ -130,11 +152,10 @@ public class MonacoFX extends Region {
 
     @Override
     public void requestFocus() {
-        getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
-            if (state == Worker.State.SUCCEEDED) {
-                super.requestFocus();
-                getWebEngine().executeScript("setTimeout(() => {  editorView.focus();}, 1200);");
-            }
+        executeJavaScriptLambda(null, param -> {
+            super.requestFocus();
+            getWebEngine().executeScript("setTimeout(() => {  editorView.focus();}, 1200);");
+            return null;
         });
     }
 
@@ -248,22 +269,22 @@ public class MonacoFX extends Region {
         if (Worker.State.SUCCEEDED == stateProperty.getValue()) {
             callback.call(parameter);
         } else {
-            getWebEngine().getLoadWorker().stateProperty().addListener((o, old, state) -> {
+            ChangeListener<Worker.State> stateChangeListener = (o, old, state) -> {
                 if (Worker.State.SUCCEEDED == state) {
-                    JSObject window = (JSObject) engine.executeScript("window");
                     AtomicBoolean jsDone = new AtomicBoolean(false);
                     AtomicInteger attempts = new AtomicInteger();
                     Thread thread = new Thread(() -> {
                         while (!jsDone.get()) {
                             // check if JS execution is done.
                             Platform.runLater(() -> {
+                                JSObject window = (JSObject) engine.executeScript("window");
                                 Object jsEditorObj = window.call("getEditorView");
                                 if (jsEditorObj instanceof JSObject) {
                                     callback.call(parameter);
                                     jsDone.set(true);
                                 }
                             });
-                            if(attempts.getAndIncrement()> 10) {
+                            if (attempts.getAndIncrement() > 10) {
                                 throw new RuntimeException(
                                         "Cannot initialize editor (JS execution not complete). Max number of attempts reached."
                                 );
@@ -279,7 +300,8 @@ public class MonacoFX extends Region {
                     });
                     thread.start();
                 }
-            });
+            };
+            stateProperty.addListener(stateChangeListener);
         }
     }
 }

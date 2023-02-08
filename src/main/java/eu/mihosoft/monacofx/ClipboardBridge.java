@@ -29,6 +29,7 @@ import netscape.javascript.JSObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Bridge between javascript code and java to add and use system clipboard functionality.
@@ -54,7 +55,7 @@ public class ClipboardBridge {
 		int endLineNumber = getNumber(jsSelection, "endLineNumber") - 1;
 		int endColumn = getNumber(jsSelection, "endColumn") - 1;
 		String originText = document.getText();
-		String[] lines = originText.split("\n");
+		String[] lines = originText.split("\n", -1);
 		StringBuilder copyText = new StringBuilder();
 		if (startLineNumber == endLineNumber) {
 			copyText = new StringBuilder(lines[startLineNumber].substring(startColumn, endColumn));
@@ -112,14 +113,20 @@ public class ClipboardBridge {
 	private void calcNewCursorPosition(JSObject position, String string) {
 		int lineNumber = getNumber(position, "lineNumber");
 		int column = getNumber(position, "column");
-		long count = string.lines().count() - 1;
+		long count = string.split("\n", -1).length - 1;
 		position.setMember("lineNumber", lineNumber + count);
-		position.setMember("column", column + string.lines().skip(count).findFirst().get().length());
+
+		Optional<String> lastLine = string.lines().skip(count).findFirst();
+		if (lastLine.isPresent()) {
+			position.setMember("column", column + lastLine.get().length());
+		} else {
+			position.setMember("column", column + string.length());
+		}
 	}
 
-	private int getNumber(JSObject selection, String startLineNumber) {
+	private int getNumber(JSObject selection, String numberName) {
 		int number = 0;
-		Object selectionMember = selection.getMember(startLineNumber);
+		Object selectionMember = selection.getMember(numberName);
 		if (selectionMember instanceof Integer) {
 			number = (Integer) selectionMember;
 		} else if (selectionMember instanceof Double) {
