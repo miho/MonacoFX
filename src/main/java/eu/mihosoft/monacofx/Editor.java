@@ -23,10 +23,7 @@
  */
 package eu.mihosoft.monacofx;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -45,6 +42,7 @@ public final class Editor {
 
     private final StringProperty currentThemeProperty = new SimpleStringProperty();
     private final StringProperty currentLanguageProperty = new SimpleStringProperty();
+    private final BooleanProperty readOnlyProperty = new SimpleBooleanProperty(false);
 
     Editor(WebEngine engine) {
         this.engine = engine;
@@ -100,11 +98,6 @@ public final class Editor {
         engine.executeScript(registerScript);
     }
 
-    private void registerThemeJS(EditorTheme t) {
-        String script = "monaco.editor.defineTheme('"+t.name+"', " + t.toJS()+")";
-        engine.executeScript(script);
-    }
-
     void setEditor(JSObject window, JSObject editor) {
         this.editor = editor;
         this.window = window;
@@ -112,42 +105,50 @@ public final class Editor {
         // register custom languages
         languages.forEach(this::registerLanguageJS);
         languages.addListener((ListChangeListener<LanguageSupport>) c -> {
-            while(c.next()) {
-                c.getAddedSubList().stream().forEach(this::registerLanguageJS);
+            while (c.next()) {
+                c.getAddedSubList().forEach(this::registerLanguageJS);
             }
         });
 
         // register custom themes
         themes.forEach(this::registerThemeJS);
         themes.addListener((ListChangeListener<EditorTheme>) c -> {
-            while(c.next()) {
-                c.getAddedSubList().stream().forEach(this::registerThemeJS);
+            while (c.next()) {
+                c.getAddedSubList().forEach(this::registerThemeJS);
             }
         });
 
-        // initial theme
-        if(getCurrentTheme()!=null) {
-            engine.executeScript("monaco.editor.setTheme('"+getCurrentTheme()+"')");
-        }
+        // Theme
+        if (getCurrentTheme() != null) setThemeJS(getCurrentTheme());
+        currentThemeProperty().addListener(ov -> setThemeJS(getCurrentTheme()));
 
-        // theme changes -> js
-        currentThemeProperty().addListener((ov) -> {
-            engine.executeScript("monaco.editor.setTheme('"+getCurrentTheme()+"')");
-        });
+        // Language.
+        if (getCurrentLanguage() != null) setLanguageJS(getCurrentLanguage());
+        currentLanguageProperty().addListener(ov -> setLanguageJS(getCurrentLanguage()));
 
-        // initial lang
-        if(getCurrentLanguage()!=null) {
-            engine.executeScript("monaco.editor.setModelLanguage(editorView.getModel(),'"+getCurrentLanguage()+"')");
-        }
-
-        // lang changes -> js
-        currentLanguageProperty().addListener((ov) -> {
-            engine.executeScript("monaco.editor.setModelLanguage(editorView.getModel(),'"+getCurrentLanguage()+"')");
-        });
+        // Read only. Editor is created with false by default.
+        if (getReadOnly()) setReadOnlyJS(getReadOnly());
+        readOnlyProperty().addListener(o -> setReadOnlyJS(getReadOnly()));
 
         getDocument().setEditor(engine, window, editor);
 
         getViewController().setEditor(window, editor);
+    }
+
+    private void registerThemeJS(EditorTheme t) {
+        engine.executeScript("monaco.editor.defineTheme('"+t.name+"', " + t.toJS()+")");
+    }
+
+    private void setThemeJS(String theme) {
+        engine.executeScript("monaco.editor.setTheme('" + theme + "')");
+    }
+
+    private void setLanguageJS(String language) {
+        engine.executeScript("monaco.editor.setModelLanguage(editorView.getModel(),'" + language + "')");
+    }
+
+    private void setReadOnlyJS(boolean value) {
+        engine.executeScript("window.getEditorView().updateOptions({ readOnly: " + value + " })");
     }
 
     public StringProperty currentThemeProperty() {
@@ -172,6 +173,18 @@ public final class Editor {
 
     public String getCurrentLanguage() {
         return currentLanguageProperty().get();
+    }
+
+    public BooleanProperty readOnlyProperty() {
+        return readOnlyProperty;
+    }
+
+    public boolean getReadOnly() {
+        return readOnlyProperty.get();
+    }
+
+    public void setReadOnly(boolean value) {
+        readOnlyProperty().set(value);
     }
 
     public ObjectProperty<Document> documentProperty() {
@@ -201,6 +214,4 @@ public final class Editor {
     public void registerTheme(EditorTheme theme) {
         this.themes.add(theme);
     }
-
-
 }
