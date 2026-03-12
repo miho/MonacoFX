@@ -26,6 +26,11 @@ package eu.mihosoft.monacofx;
 
 import netscape.javascript.JSObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Bridge between javascript code and java to add and use system clipboard functionality.
  */
@@ -50,7 +55,7 @@ public class ClipboardBridge {
 		int endLineNumber = getNumber(jsSelection, "endLineNumber") - 1;
 		int endColumn = getNumber(jsSelection, "endColumn") - 1;
 		String originText = document.getText();
-		String[] lines = originText.split("\n");
+		String[] lines = originText.split("\n", -1);
 		StringBuilder copyText = new StringBuilder();
 		if (startLineNumber == endLineNumber) {
 			copyText = new StringBuilder(lines[startLineNumber].substring(startColumn, endColumn));
@@ -88,27 +93,45 @@ public class ClipboardBridge {
 		return position;
 	}
 
-
 	private String addPasteString(JSObject jsSelection, String pasteString, String originText) {
-		String[] lines = originText.split("\n");
+		// https://stackoverflow.com/questions/14602062/java-string-split-removed-empty-values
+		String[] lines = originText.split("\n", -1);
 		int startLineNumber = getNumber(jsSelection, "startLineNumber") - 1;
 		int startColumn = getNumber(jsSelection, "startColumn") - 1;
-		String beforeMousePosition = lines[startLineNumber].substring(0, startColumn);
-		String afterMousePosition = lines[startLineNumber].substring(startColumn);
-		String lineChanged = beforeMousePosition + pasteString + afterMousePosition;
-		lines[startLineNumber] = lineChanged;
+		if (startLineNumber < lines.length) {
+			String beforeMousePosition = lines[startLineNumber].substring(0, startColumn);
+			String afterMousePosition = lines[startLineNumber].substring(startColumn);
+			lines[startLineNumber] = beforeMousePosition + pasteString + afterMousePosition;;
+		} else {
+			List<String> list = new ArrayList<>(Arrays.asList(lines));
+			list.add(pasteString);
+			lines = list.toArray(new String[0]);
+		}
 		return String.join("\n", lines);
 	}
 
 	private void calcNewCursorPosition(JSObject position, String string) {
 		int lineNumber = getNumber(position, "lineNumber");
 		int column = getNumber(position, "column");
-		long count = string.lines().count() - 1;
+		long count = string.split("\n", -1).length - 1;
 		position.setMember("lineNumber", lineNumber + count);
-		position.setMember("column", column + string.lines().skip(count).findFirst().get().length());
+
+		Optional<String> lastLine = string.lines().skip(count).findFirst();
+		if (lastLine.isPresent()) {
+			position.setMember("column", column + lastLine.get().length());
+		} else {
+			position.setMember("column", column + string.length());
+		}
 	}
 
-	private int getNumber(JSObject selection, String startLineNumber) {
-		return Integer.parseInt(String.valueOf(selection.getMember(startLineNumber)));
+	private int getNumber(JSObject selection, String numberName) {
+		int number = 0;
+		Object selectionMember = selection.getMember(numberName);
+		if (selectionMember instanceof Integer) {
+			number = (Integer) selectionMember;
+		} else if (selectionMember instanceof Double) {
+			number = ((Double) selectionMember).intValue();
+		}
+		return number;
 	}
 }

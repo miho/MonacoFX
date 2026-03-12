@@ -25,6 +25,7 @@ package eu.mihosoft.monacofx;
 
 import javafx.beans.property.*;
 import javafx.scene.web.WebEngine;
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 public class Document {
@@ -89,7 +90,11 @@ public class Document {
             }finally {
                 updatingText=false;
             }
-            editor.call("setValue", text);
+            try {
+                editor.call("setValue", text);
+            } catch (JSException jsException) {
+                textProperty.set(text);
+            }
         }
     }
 
@@ -118,6 +123,12 @@ public class Document {
      * @param text the text in editor is replaced byt this text
      */
     public void updateText(String text) {
-        window.call("updateText", text);
+        try {
+            window.call("updateText", text);
+        } catch (JSException jsException) {
+            // in some cases the window object gets lost. why? this is a workaround
+            window = (JSObject) engine.executeScript("window");
+            window.call("updateText", text);
+        }
     }
 }

@@ -80,7 +80,7 @@ public class ClipboardBridgeTest {
 
 		JSObject position = Mockito.mock(JSObject.class);
 		when(position.getMember("lineNumber")).thenReturn(1);
-		when(position.getMember("column")).thenReturn(33);
+		when(position.getMember("column")).thenReturn(35);
 
 		when(systemClipboardWrapper.hasString()).thenReturn(true);
 		when(systemClipboardWrapper.getString()).thenReturn("text in \nclipboard");
@@ -92,9 +92,32 @@ public class ClipboardBridgeTest {
 		Mockito.verify(document).updateText(updateTextCapture.capture());
 		assertEquals("some text where at this position 'text in \nclipboard' something is pasted", updateTextCapture.getValue());
 		verify(paste).setMember("lineNumber", 2L);
-		verify(paste).setMember("column", 42);
+		verify(paste).setMember("column", 44);
 
 	}
 
+	@Test
+	public void pasteAtTheEnd()  {
+		// given
+		when(document.getText()).thenReturn("some text where pasted at the end");
+
+		JSObject selection = Mockito.mock(JSObject.class);
+		when(selection.getMember("startLineNumber")).thenReturn(2);
+		when(selection.getMember("startColumn")).thenReturn(0);
+
+		JSObject position = Mockito.mock(JSObject.class);
+		when(position.getMember("lineNumber")).thenReturn(2);
+		when(position.getMember("column")).thenReturn(0);
+
+		when(systemClipboardWrapper.hasString()).thenReturn(true);
+		when(systemClipboardWrapper.getString()).thenReturn("text in clipboard");
+		// when
+		JSObject paste = clipboardBridge.paste(selection, position);
+		// then
+		Mockito.verify(document).updateText(updateTextCapture.capture());
+		assertEquals("some text where pasted at the end\ntext in clipboard", updateTextCapture.getValue());
+		verify(paste).setMember("lineNumber", 2L);
+		verify(paste).setMember("column", 17);
+	}
 
 }
